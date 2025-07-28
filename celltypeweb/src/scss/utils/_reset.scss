@@ -1,0 +1,55 @@
+@charset "utf-8";
+body, dl, dd, h1, h2, h3, h4, h5, h6, p,form,img{
+	margin:0;
+}
+ul{
+	margin:0;
+	padding:0;
+	list-style: none;
+}
+body,
+html {
+	font-size: 12px;
+	font-family: '\5FAE\8F6F\96C5\9ED1', sans-serif;
+	background: #f2f2f2;
+	position: relative;
+	height: 100%;
+	width: 100%;
+}
+img{
+	overflow: hidden;
+	border: 0;
+}
+strong,
+b{
+	font-weight:bold;
+}
+a {
+  background-color: transparent;
+  text-decoration: none;
+  color: #333;
+}
+a:active,
+a:hover {
+  outline: 0;
+}
+button,
+select,
+input,
+textarea {
+	vertical-align: middle;
+	outline: none;
+	resize:none;
+	background: #fff;
+	color: inherit;
+	font: inherit;
+	margin: 0;
+}
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+td,
+th {
+  padding: 0;
+}

@@ -1,0 +1,32 @@
+{
+  "name": "think-js",
+  "version": "1.0.0",
+  "description": "This is a node framework based on koa2 encapsulation.",
+  "main": "index.js",
+  "_moduleAliases": {
+    "@": "app",
+    "@route": "route",
+    "@config": "config",
+    "@views": "views"
+  },
+  "scripts": {
+    "dev": "nodemon index.js",
+    "start": "pm2 start index.js -i 3 --name='CellTypeDB'"
+  },
+  "author": "zhangyu",
+  "license": "ISC",
+  "dependencies": {
+    "child_process": "^1.0.2",
+    "ejs": "^3.1.10",
+    "koa-body": "^6.0.1",
+    "koa-router": "^13.1.1",
+    "koa-views": "^8.1.0",
+    "koa2": "^2.0.0-alpha.7",
+    "module-alias": "^2.2.3",
+    "mysql": "^2.18.1",
+    "nodemon": "^3.1.10",
+    "pm2": "^6.0.8",
+    "redis": "^5.6.1",
+    "think-js-lib": "^1.1.3"
+  }
+}

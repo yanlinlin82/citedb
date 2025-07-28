@@ -1,0 +1,112 @@
+.wrap-header{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 1000;
+  // padding-top: 20px;
+  // border-top: 5px solid;
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+  box-shadow: 0px 4px 30px 0px rgba(38, 38, 38, 0.2);
+}
+.main-header{
+  background: #ffffff;
+  border-bottom: 1px solid #eeeeee;
+  .logo{
+    height: 50px;
+    // margin-right: 50px;
+    cursor: pointer;
+    img{
+      height: 57px;
+    }
+  }
+
+  .container{
+    width: 1170px;
+    margin: 0 auto;
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+  }
+
+  .login{
+    font-size: 14px;
+    cursor: pointer;
+    &:hover{
+      color: $color-primary
+    }
+  }
+
+  .bar{
+    display: flex;
+    .item{
+      font-size: 16px;
+      font-weight: 300;
+      position: relative;
+      height: 64px;
+      line-height: 64px;
+      padding: 0 20px;
+      color: #817a7a;
+      cursor: pointer;
+      font-weight: 500;
+      &.active{
+        color: $color-primary;
+        // font-weight: 500;
+      }
+      &.active:before {
+        width: 100%;
+        left: 0;
+      }
+
+      .child{
+        position: absolute;
+        left: 0;
+        text-align: center;
+        display: none;
+        width: 100%;
+        background: #ffffff;
+        color: #000000;
+        .child-item{
+          border-bottom: 1px solid #eeeeee;
+          line-height: 40px;
+          &.active{
+            color: $color-primary;
+          }
+        }
+        .child-item:hover{
+          color: $color-primary;
+          font-weight: 500;
+        }
+      }
+    }
+
+    .item:hover{
+      color: $color-primary;
+    }
+
+    .item:hover .child{
+      display: block;
+    }
+
+    .item::before {
+      content: "";
+      position: absolute;
+      bottom: 0px;
+      left: 100%;
+      width: 0;
+      height: 3px;
+      background: $color-primary;
+      transition: 0.1s all linear;
+    }
+    .item:hover::before {
+      width: 100%;
+      left: 0;
+    }
+    .item:hover ~ .item::before {
+      left: 0;
+    }
+  }
+}
