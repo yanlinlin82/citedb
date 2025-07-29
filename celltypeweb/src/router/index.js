@@ -5,11 +5,8 @@
  * @LastEditors: zhangyu
  * @LastEditTime: 2021-06-29 18:47:33
  */
-import Vue from 'vue'
-import VueRouter from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import Index from '../views/index/Index.vue'
-
-Vue.use(VueRouter)
 
 const routes = [
   {
@@ -19,7 +16,7 @@ const routes = [
   },
   {
     path: '/index',
-    name: 'Index',
+    name: 'IndexPage',
     component: Index
   },
   {
@@ -58,12 +55,16 @@ const routes = [
     // this generates a separate chunk (about.[hash].js) for this route
     // which is lazy-loaded when the route is visited.
     component: () => import(/* webpackChunkName: "team" */ '../views/help/Index.vue')
+  },
+  // 添加catch-all路由，重定向到首页
+  {
+    path: '/:pathMatch(.*)*',
+    redirect: '/'
   }
 ]
 
-const router = new VueRouter({
-  // mode: 'history',
-  base: process.env.BASE_URL,
+const router = createRouter({
+  history: createWebHistory(process.env.BASE_URL),
   routes
 })
 

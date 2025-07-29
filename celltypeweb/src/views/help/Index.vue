@@ -7,62 +7,59 @@
   <div class="wrap-team">
     <NavBar current="help" />
     <div class="content">
-      <video-player  class="video-player-box"
-        ref="videoPlayer"
-        :options="playerOptions"
-        :playsinline="true"
-        customEventName="customstatechangedeventname"
-
-      >
-      </video-player>
-      <PDF ref="pdf" v-for="i in numPages" :key="i" :page="i" :src="url"></PDF>
+      <div class="help-content">
+        <h1>Help & Documentation</h1>
+        <div class="section">
+          <h2>About CITEdb</h2>
+          <p>CITEdb (Cell-cell InTEraction database) is a manually curated database of cell-cell interactions at cell type level, which was derived from 509 published papers in PubMed before January 17, 2022 by 3 reviewers. 728 pairs of cell-cell interactions in human were collected and deposited in current version.</p>
+        </div>
+        
+        <div class="section">
+          <h2>How to Use</h2>
+          <h3>Search Functionality</h3>
+          <ul>
+            <li><strong>Context Search:</strong> Use the left tree to search for interactions in specific biological contexts</li>
+            <li><strong>Cell Type Search:</strong> Use the right tree to search for interactions involving specific cell types</li>
+            <li><strong>Method Filter:</strong> Filter results by experimental or computational methods</li>
+            <li><strong>Demo Buttons:</strong> Try the Demo1 and Demo2 buttons for quick examples</li>
+          </ul>
+          
+          <h3>Download Data</h3>
+          <p>You can download the complete CITEdb dataset in Excel format from the Download page.</p>
+          
+          <h3>Statistics</h3>
+          <p>View comprehensive statistics and visualizations of the database on the Statistics page.</p>
+        </div>
+        
+        <div class="section">
+          <h2>Contact</h2>
+          <p>For questions or suggestions, please contact our team through the Team page.</p>
+        </div>
+      </div>
     </div>
     <Footer/>
   </div>
 </template>
 
 <script>
-import 'video.js/dist/video-js.css'
 import NavBar from '@components/NavBar'
 import Footer from '@components/Footer'
-import PDF from 'vue-pdf'
-import { videoPlayer } from 'vue-video-player'
+
 export default {
   components: {
     NavBar,
-    PDF,
-    Footer,
-    videoPlayer
+    Footer
   },
   data () {
     return {
-      playerOptions: {
-        // videojs options
-        muted: true,
-        language: 'en',
-        width: 1130,
-        playbackRates: [0.7, 1.0, 1.5, 2.0],
-        sources: [{
-          type: 'video/mp4',
-          src: 'https://citedb.cn/cite.mp4'
-        }]
-      },
-      url: '/help.pdf',
-      numPages: null
+      // 移除有问题的组件相关数据
     }
   },
   mounted () {
-    this.getNumPages()
+    console.log('Help page loaded successfully')
   },
   methods: {
-    getNumPages () {
-      const loadingTask = PDF.createLoadingTask(this.url)
-      loadingTask.promise.then(pdf => {
-        this.numPages = pdf.numPages
-      }).catch(err => {
-        console.log('pdf 加载失败', err)
-      })
-    }
+    // 移除有问题的组件方法
   }
 }
 </script>
@@ -71,8 +68,50 @@ export default {
   padding: 20px;
   padding-top: 100px;
   background: #FFFFFF;
+  min-height: 80vh;
 }
-.video-player-box{
-  width: 100%;
+
+.help-content {
+  max-width: 800px;
+  margin: 0 auto;
+  
+  h1 {
+    color: #333;
+    margin-bottom: 30px;
+    text-align: center;
+  }
+  
+  .section {
+    margin-bottom: 40px;
+    
+    h2 {
+      color: #2c3e50;
+      border-bottom: 2px solid #3498db;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    
+    h3 {
+      color: #34495e;
+      margin-top: 25px;
+      margin-bottom: 15px;
+    }
+    
+    p {
+      line-height: 1.6;
+      color: #555;
+      margin-bottom: 15px;
+    }
+    
+    ul {
+      margin-left: 20px;
+      
+      li {
+        line-height: 1.6;
+        color: #555;
+        margin-bottom: 8px;
+      }
+    }
+  }
 }
 </style>

@@ -32,6 +32,18 @@ import * as echarts from 'echarts'
 let agg = {}
 export default {
   props: ['chartList', 'check'],
+  data() {
+    return {
+      cakeChart: null
+    }
+  },
+  beforeUnmount() {
+    // 清理ECharts实例
+    if (this.cakeChart) {
+      this.cakeChart.dispose()
+      this.cakeChart = null
+    }
+  },
   methods: {
     async getCount () {
       const res = await this.$axios.post('get_tree', {

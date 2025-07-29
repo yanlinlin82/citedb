@@ -16,12 +16,12 @@ module.exports = {
       // pass options to sass-loader
       sass: {
         // 引入全局变量样式,@使我们设置的别名,执行src目录
-        prependData: '@import "~@/scss/utils/_theme.scss";'
+        additionalData: '@import "~@/scss/utils/_theme.scss";'
       }
     }
   },
   transpileDependencies: [
-    'element-ui',
+    'element-plus',
     'axios'
   ],
   // 发布路径，发布到服务端需要和其他项目区分开
@@ -29,8 +29,13 @@ module.exports = {
     ? '/'
     : '/',
   devServer: {
-    //proxy: 'https://citedb.cn/api/v1'
-    proxy: 'http://localhost:7999/api/v1'
+    proxy: {
+      '/api/v1': {
+        target: 'http://localhost:7999',
+        changeOrigin: true,
+        pathRewrite: { '^/api/v1': '/api/v1' }
+      }
+    }
   },
   chainWebpack: config => {
     config.plugins.delete('prefetch')
@@ -45,9 +50,17 @@ module.exports = {
       .set('@config', resolve('src/config'))
       .set('@store', resolve('src/store'))
       .set('@mixin', resolve('src/mixin'))
+
+    // 配置 Vue 特性标志
+    config.plugin('define').tap(args => {
+      args[0]['__VUE_PROD_HYDRATION_MISMATCH_DETAILS__'] = JSON.stringify(false)
+      return args
+    })
+
     // config
     //   .plugin('webpack-bundle-analyzer')
     //   .use(require('webpack-bundle-analyzer').BundleAnalyzerPlugin)
     return config
-  }
+  },
+  lintOnSave: false
 }

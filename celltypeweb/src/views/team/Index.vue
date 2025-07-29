@@ -23,13 +23,13 @@
           width="210">
         </el-table-column>
         <el-table-column label="Contribution">
-          <template slot-scope="scope">
-            <div class="email"><i :class="scope.row.type === 'data' ? 'el-icon-coin' : 'el-icon-mouse'" class="el-icon-message icon"></i>{{ scope.row.contribution}}</div>
+          <template #default="scope">
+            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contribution}}</div>
           </template>
         </el-table-column>
         <el-table-column label="Contact">
-          <template slot-scope="scope">
-            <div class="email"><i class="el-icon-message icon"></i>{{ scope.row.contact}}</div>
+          <template #default="scope">
+            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contact}}</div>
           </template>
         </el-table-column>
       </el-table>
@@ -46,13 +46,13 @@
           width="210">
         </el-table-column>
         <el-table-column label="Contribution">
-          <template slot-scope="scope">
-            <div class="email"><i :class="scope.row.type === 'data' ? 'el-icon-coin' : 'el-icon-mouse'" class="el-icon-message icon"></i>{{ scope.row.contribution}}</div>
+          <template #default="scope">
+            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contribution}}</div>
           </template>
         </el-table-column>
         <el-table-column label="Contact">
-          <template slot-scope="scope">
-            <div class="email"><i class="el-icon-message icon"></i>{{ scope.row.contact}}</div>
+          <template #default="scope">
+            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contact}}</div>
           </template>
         </el-table-column>
       </el-table>

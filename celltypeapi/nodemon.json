@@ -1,0 +1,11 @@
+{
+  "watch": ["simple-index.js", "lib/", "config/"],
+  "ext": "js,json",
+  "ignore": ["node_modules/", "logs/", "database/"],
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "exec": "node simple-index.js",
+  "verbose": true,
+  "colours": true
+}

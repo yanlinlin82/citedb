@@ -1,20 +1,25 @@
-import Vue from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 import store from './store'
 import axios from './utils/axios'
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css'
+import ElementPlus from 'element-plus'
+import 'element-plus/dist/index.css'
 import './scss/styles.scss'
-import locale from 'element-ui/lib/locale/lang/en'
-Vue.config.productionTip = false
-Vue.use(ElementUI, { locale })
-const install = function (Vue) {
-  Object.defineProperty(Vue.prototype, '$axios', { value: axios })
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
+const app = createApp(App)
+
+// Register all Element Plus icons
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
 }
-Vue.use(install)
-new Vue({
-  router,
-  store,
-  render: h => h(App)
-}).$mount('#app')
+
+app.use(ElementPlus)
+
+// Add axios to app config
+app.config.globalProperties.$axios = axios
+
+app.use(router)
+app.use(store)
+app.mount('#app')

@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Notification } from 'element-ui'
+import { ElNotification } from 'element-plus'
 
 let cancel = null
 const promiseMap = {}
@@ -9,9 +9,10 @@ const CancelToken = axios.CancelToken
 // console.log(VUE_APP_BASE_URL)
 // const TOKEN_KEY = process.env.TOKEN_KEY
 // const APP_ID = process.env.APP_ID
-if (process.env.NODE_ENV !== 'development') {
-  axios.defaults.baseURL = 'https://citedb.cn/api/v1/'
-}
+
+// 设置baseURL，开发和生产环境都使用/api/v1前缀
+axios.defaults.baseURL = '/api/v1/'
+
 // axios.defaults.timeout = 10000
 // axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 
@@ -45,7 +46,7 @@ axios.interceptors.response.use(
     } else if (response.data.code === 9900) {
       if (showError) {
         showError = false
-        Notification({
+        ElNotification({
           type: 'error',
           title: '请重新登录',
           message: response.data.msg,

@@ -20,8 +20,8 @@
         :header-cell-style="{background:'#EFF0FF', color: '#161616'}"
         style="width: 100%">
         <el-table-column label="FileName">
-          <template slot-scope="scope">
-            <div class="name" @click="Update_Count"><i class="el-icon-download icon"></i>
+          <template #default="scope">
+            <div class="name" @click="Update_Count"><el-icon class="icon"><Download /></el-icon>
             <el-link href="https://citedb.cn/CITEdb.xlsx" @click="download">{{ scope.row.name}}</el-link></div>
           </template>
         </el-table-column>
@@ -77,7 +77,13 @@ export default {
         this.list[0].times = res.data.count
         this.list[0].last = res.data.update_time
       }
+    }).catch(err => {
+      console.log('获取下载次数失败:', err)
     })
+  },
+  beforeUnmount() {
+    // 清理组件状态
+    this.list = []
   },
   methods: {
     Update_Count () {
@@ -85,6 +91,8 @@ export default {
         count: this.list[0].times
       }).then(() => {
         location.reload()
+      }).catch(err => {
+        console.log('更新下载次数失败:', err)
       })
     },
     download () {

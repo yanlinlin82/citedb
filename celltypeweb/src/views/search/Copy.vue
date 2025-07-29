@@ -27,7 +27,7 @@
             <div class="flex">
               <div class="label">Context </div>
             </div>
-            <div class="result"><i class="el-icon-bell"></i> {{contextResult}}</div>
+            <div class="result"><el-icon><Bell /></el-icon> {{contextResult}}</div>
             <el-input placeholder="请输入内容" v-model="contextValue" @input="contextChange" clearable class="input-with-select">
             </el-input>
             <div class="result-list">
@@ -41,10 +41,10 @@
               <div class="label">Cell type </div>
             </div>
             <div class="result">
-              <i class="el-icon-bell icon-cell-type"></i>
+              <el-icon class="icon-cell-type"><Bell /></el-icon>
               <div @click="deleteTag(index)" v-for="(item, index) in tagList" :key="item" class="tag">
                 {{item}}
-                <i class="el-icon-circle-close"></i>
+                <el-icon><CircleClose /></el-icon>
               </div>
             </div>
             <el-input placeholder="请输入内容" v-model="sourceValue" @input="sourceChange"  clearable class="input-with-select">

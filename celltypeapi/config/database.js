@@ -4,15 +4,25 @@
  * @LastEditTime: 2022-04-06 15:00:21
  */
 
-// 数据库配置文件
+// 数据库配置文件 - better-sqlite3版本
 module.exports = {
     db: {
-        host: 'rm-2zej4167a19854516.mysql.rds.aliyuncs.com', // 正式地址
-        port: 3306, // 端口
-        user: 'pvpgm59ov72e0dmx', // 用户名
-        password: 'lnwmjhWJjhAzKAwitA4AK1q3yu6qQUub', // 密码
-        database: 'cell_type_interact_db' // 数据库名
+        type: 'sqlite3',
+        database: './database/cell_type_interact.db', // SQLite数据库文件路径
+        options: {
+            // better-sqlite3连接选项
+            verbose: null, // 禁用详细日志
+            fileMustExist: false,  // 如果数据库文件不存在则创建
+            readonly: false // 读写模式
+        }
     },
+    //db: {
+    //    host: 'rm-2zej4167a19854516.mysql.rds.aliyuncs.com', // 正式地址
+    //    port: 3306, // 端口
+    //    user: 'pvpgm59ov72e0dmx', // 用户名
+    //    password: 'lnwmjhWJjhAzKAwitA4AK1q3yu6qQUub', // 密码
+    //    database: 'cell_type_interact_db' // 数据库名
+    //},
     // db: {
     //     host: 'rm-2zej4167a19854516uo.mysql.rds.aliyuncs.com', // 本地测试连接正式地址
     //     port: 3306, // 端口

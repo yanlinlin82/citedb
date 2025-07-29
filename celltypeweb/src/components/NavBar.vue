@@ -82,6 +82,8 @@ export default {
         query: {
           ...item.query
         }
+      }).catch(err => {
+        console.log('导航错误:', err)
       })
     },
     changePage (item) {
@@ -90,14 +92,18 @@ export default {
       }
       this.$router.push({
         path: item.url
+      }).catch(err => {
+        console.log('导航错误:', err)
       })
     },
     goIndex () {
-      if (this.$route.path === '/index') {
+      if (this.$route.path === '/' || this.$route.path === '/index') {
         return
       }
       this.$router.push({
-        path: 'index'
+        path: '/'
+      }).catch(err => {
+        console.log('导航错误:', err)
       })
     }
   }

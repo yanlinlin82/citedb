@@ -175,6 +175,11 @@ export default {
     this.getContextTree()
     this.getCellTypeTree()
   },
+  beforeUnmount() {
+    // 清理组件状态
+    this.chartList = []
+    this.tableList = []
+  },
   watch: {
     context_input (val) {
       this.$refs.tree1.filter(val)
@@ -196,15 +201,19 @@ export default {
     },
     // 展开或关闭节点
     openOrCloseTree1 () {
-      var nodes = this.$refs.tree1.store.nodesMap
-      for (var i in nodes) {
-        nodes[i].expanded = !this.contextFold
+      if (this.$refs.tree1 && this.$refs.tree1.store && this.$refs.tree1.store.nodesMap) {
+        var nodes = this.$refs.tree1.store.nodesMap
+        for (var i in nodes) {
+          nodes[i].expanded = !this.contextFold
+        }
       }
     },
     openOrCloseTree2 () {
-      var nodes = this.$refs.tree2.store.nodesMap
-      for (var i in nodes) {
-        nodes[i].expanded = !this.cellTypeFold
+      if (this.$refs.tree2 && this.$refs.tree2.store && this.$refs.tree2.store.nodesMap) {
+        var nodes = this.$refs.tree2.store.nodesMap
+        for (var i in nodes) {
+          nodes[i].expanded = !this.cellTypeFold
+        }
       }
     },
     getContextTree () {
@@ -213,8 +222,12 @@ export default {
       }).then((res) => {
         if (res.msg === 'ok') {
           this.treeList1 = res.data
-          this.$refs.tree1.setCheckedKeys([])
+          if (this.$refs.tree1) {
+            this.$refs.tree1.setCheckedKeys([])
+          }
         }
+      }).catch(err => {
+        console.log('获取Context树失败:', err)
       })
     },
     getCellTypeTree () {
@@ -223,8 +236,12 @@ export default {
       }).then((res) => {
         if (res.msg === 'ok') {
           this.treeList2 = res.data
-          this.$refs.tree2.setCheckedKeys([])
+          if (this.$refs.tree2) {
+            this.$refs.tree2.setCheckedKeys([])
+          }
         }
+      }).catch(err => {
+        console.log('获取Cell Type树失败:', err)
       })
     },
     handleCheckChange1 (data, checked) {
@@ -270,10 +287,14 @@ export default {
           this.chartList = res.data
           if (this.chartList.length > 0) {
             this.$nextTick(() => {
-              this.$refs.chart.initData(res.data)
+              if (this.$refs.chart) {
+                this.$refs.chart.initData(res.data)
+              }
             })
           }
         }
+      }).catch(err => {
+        console.log('获取图表数据失败:', err)
       })
     },
     getTableList () {
@@ -291,6 +312,8 @@ export default {
           this.tableList = res.data.list
           this.total = res.data.totalCount
         }
+      }).catch(err => {
+        console.log('获取表格数据失败:', err)
       })
     },
     // 点击每页多少条
@@ -305,23 +328,31 @@ export default {
     },
     demo1Click () {
       this.contextVal = ['immune response'].join(',')
-      this.$refs.tree1.setCheckedKeys(['CH311'])
+      if (this.$refs.tree1) {
+        this.$refs.tree1.setCheckedKeys(['CH311'])
+      }
       this.cellTypeVal = ''
-      this.$refs.tree2.setCheckedKeys([])
+      if (this.$refs.tree2) {
+        this.$refs.tree2.setCheckedKeys([])
+      }
       this.getAllList()
     },
     demo2Click () {
-      this.$refs.tree2.setCheckedKeys(['B cell', 'endothelial cell', 'fibroblast', 'macrophage', 'natural killer cell', 'T cell'])
-      const tree2 = this.$refs.tree2.getCheckedNodes()
-      const arr = []
-      tree2.forEach(item => {
-        if (!item.isFather) {
-          arr.push(item.label)
-        }
-      })
-      this.cellTypeVal = arr.join(',')
+      if (this.$refs.tree2) {
+        this.$refs.tree2.setCheckedKeys(['B cell', 'endothelial cell', 'fibroblast', 'macrophage', 'natural killer cell', 'T cell'])
+        const tree2 = this.$refs.tree2.getCheckedNodes()
+        const arr = []
+        tree2.forEach(item => {
+          if (!item.isFather) {
+            arr.push(item.label)
+          }
+        })
+        this.cellTypeVal = arr.join(',')
+      }
       this.contextVal = ''
-      this.$refs.tree1.setCheckedKeys([])
+      if (this.$refs.tree1) {
+        this.$refs.tree1.setCheckedKeys([])
+      }
       this.form.check1 = true
       this.getAllList()
     },
@@ -334,7 +365,9 @@ export default {
       this.cell_type_input = ''
       this.chartList = []
       this.tableList = []
-      this.$refs.chart.initData([])
+      if (this.$refs.chart) {
+        this.$refs.chart.initData([])
+      }
       this.getContextTree()
       this.getCellTypeTree()
     }

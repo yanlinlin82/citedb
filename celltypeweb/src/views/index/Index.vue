@@ -7,11 +7,12 @@
 -->
 <template>
   <div class="wrap-index">
+    <div class="debug-info">Index组件已加载 - {{ currentTime }}</div>
     <NavBar current="index" />
     <div class="content">
       <div class="title">Welcome to CITEdb!</div>
       <div class="subtitle">
-        <i class="el-icon-d-arrow-right icon"></i>
+        <el-icon class="icon"><ArrowRight /></el-icon>
         About CITEdb
         </div>
       <div class="text">
@@ -20,7 +21,7 @@
       </div>
 
       <div class="subtitle">
-        <i class="el-icon-d-arrow-right icon"></i>
+        <el-icon class="icon"><ArrowRight /></el-icon>
         What can users do in <span class="name">CITEdb</span>
       </div>
       <div class="text" style="font-size: 18px">
@@ -39,7 +40,7 @@
         5. Download all cell-cell interactions of different contexts
       </div>
       <div class="subtitle">
-        <i class="el-icon-d-arrow-right icon"></i>
+        <el-icon class="icon"><ArrowRight /></el-icon>
         Citation
       </div>
       <div class="text">
@@ -62,11 +63,11 @@ export default {
   },
   data () {
     return {
-
+      currentTime: new Date().toLocaleString()
     }
   },
   mounted () {
-
+    console.log('Index组件已挂载')
   },
   methods: {
 
@@ -79,6 +80,17 @@ export default {
   align-items: center;
   flex-direction: column;
   height: 100vh;
+}
+.debug-info {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background: #ff6b6b;
+  color: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  z-index: 9999;
 }
 .content{
   background: #FFFFFF;

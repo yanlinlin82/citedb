@@ -34,7 +34,7 @@
         prop="mesh_name"
         :show-overflow-tooltip="true"
         label="Mesh Term">
-        <template slot-scope="scope">
+        <template #default="scope">
           <div style="display:flex;flex-direction:column;">
             <el-link class="block" v-for="(item, index) in filterId(scope.row)" :key="item" @click="go(scope.row.url[index])" type="primary">{{filterName(scope.row, index, item)}};</el-link>
           </div>

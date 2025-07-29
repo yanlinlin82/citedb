@@ -3,10 +3,10 @@
  * @Date: 2021-04-15 21:18:51
  * @LastEditTime: 2022-04-06 14:56:23
  */
-const Controller = require('think-js-lib').Controller
+const BaseController = require('./base.js')
 const exec = require('child_process').execSync
 
-class SearchController extends Controller{
+class SearchController extends BaseController{
     // 获取context树结构
     async get_tree(ctx){
         let params = this.getParams(ctx)

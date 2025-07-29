@@ -1,32 +1,33 @@
 {
-  "name": "think-js",
+  "name": "celltypeapi",
   "version": "1.0.0",
-  "description": "This is a node framework based on koa2 encapsulation.",
-  "main": "index.js",
-  "_moduleAliases": {
-    "@": "app",
-    "@route": "route",
-    "@config": "config",
-    "@views": "views"
-  },
+  "description": "Cell Type Database API",
+  "main": "simple-index.js",
   "scripts": {
-    "dev": "nodemon index.js",
-    "start": "pm2 start index.js -i 3 --name='CellTypeDB'"
+    "dev": "nodemon simple-index.js",
+    "start": "node simple-index.js",
+    "pm2:start": "pm2 start simple-index.js -i 1 --name='CellTypeDB'",
+    "pm2:stop": "pm2 stop CellTypeDB"
   },
   "author": "zhangyu",
   "license": "ISC",
   "dependencies": {
-    "child_process": "^1.0.2",
-    "ejs": "^3.1.10",
-    "koa-body": "^6.0.1",
-    "koa-router": "^13.1.1",
-    "koa-views": "^8.1.0",
-    "koa2": "^2.0.0-alpha.7",
-    "module-alias": "^2.2.3",
-    "mysql": "^2.18.1",
+    "@koa/router": "^12.0.2",
+    "koa": "^3.0.1",
+    "koa-bodyparser": "^4.4.1",
+    "dayjs": "^1.11.10",
     "nodemon": "^3.1.10",
-    "pm2": "^6.0.8",
-    "redis": "^5.6.1",
-    "think-js-lib": "^1.1.3"
+    "better-sqlite3": "^9.4.3"
+  },
+  "overrides": {
+    "glob": "^10.3.10",
+    "rimraf": "^5.0.5",
+    "npmlog": "^7.0.1",
+    "gauge": "^5.0.0",
+    "are-we-there-yet": "^4.0.0",
+    "inflight": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
   }
 }

@@ -3,9 +3,9 @@
  * @Date: 2021-04-15 21:18:51
  * @LastEditTime: 2021-10-11 13:52:26
  */
-const Controller = require('think-js-lib').Controller
+const BaseController = require('./base.js')
 
-class DownloadController extends Controller{
+class DownloadController extends BaseController{
   // 显示下载数量
   async show_count(ctx){
     let result = await this.Db('download').where('id',1).find()
