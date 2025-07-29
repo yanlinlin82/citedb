@@ -471,12 +471,12 @@ router.post('/api/v1/get_count', async (ctx) => {
         console.log('get_count called with:', { name, check })
         
         // 根据名称查询计数
-        let whereCondition = check ? 'source_cell_type_class = ?' : 'source_cell_type = ?'
+        const fieldName = check ? 'source_cell_type_class' : 'source_cell_type'
         
-        console.log('Using where condition:', whereCondition, 'with value:', name)
+        console.log('Using field:', fieldName, 'with value:', name)
         
         const result = await db.Db('source')
-            .where(whereCondition, [name])
+            .where(fieldName, '=', name)
             .count('*')
         
         console.log('Query result:', result)
