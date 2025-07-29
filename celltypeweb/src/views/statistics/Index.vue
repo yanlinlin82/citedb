@@ -509,7 +509,7 @@ export default {
       }
       
       // 按count降序排序
-      const sortedData = [...chartData.data].sort((a, b) => b.count - a.count)
+      const sortedData = [...chartData.data].sort((a, b) => a.count - b.count)
       
       const pairs = sortedData.map(item => `${item.source} : ${item.target}`)
       const counts = sortedData.map(item => item.count)
