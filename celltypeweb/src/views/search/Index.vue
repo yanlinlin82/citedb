@@ -35,7 +35,14 @@
                 >
               </div>
               <div class="tree-container">
+                <div v-if="loading.contextTree" class="text-center py-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-3 text-muted">Loading context tree...</p>
+                </div>
                 <el-tree
+                  v-else
                   ref="tree1"
                   :data="treeList1"
                   show-checkbox
@@ -75,7 +82,14 @@
                 >
               </div>
               <div class="tree-container">
+                <div v-if="loading.cellTypeTree" class="text-center py-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-3 text-muted">Loading cell type tree...</p>
+                </div>
                 <el-tree
+                  v-else
                   ref="tree2"
                   :data="treeList2"
                   show-checkbox
@@ -241,7 +255,13 @@
               </div>
 
               <!-- 无结果提示 -->
-              <div v-if="(!chartList || chartList.length === 0) && (!tableList || tableList.length === 0)" class="text-center py-5">
+              <div v-if="loading.results" class="text-center py-5">
+                <div class="spinner-border text-primary" role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+                <p class="mt-3 text-muted">Loading search results...</p>
+              </div>
+              <div v-else-if="(!chartList || chartList.length === 0) && (!tableList || tableList.length === 0)" class="text-center py-5">
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">No results found</h5>
                 <p class="text-muted">Please select some criteria and try searching again.</p>
@@ -301,7 +321,14 @@ export default {
       tableList: [],
       total: 0,
       current: 1,
-      size: 10
+      size: 10,
+      
+      // 加载状态
+      loading: {
+        contextTree: false,
+        cellTypeTree: false,
+        results: false
+      }
     }
   },
   mounted () {
@@ -347,6 +374,7 @@ export default {
       })
     },
     getContextTree () {
+      this.loading.contextTree = true
       this.$axios.post('get_tree', {
         word: this.context_input
       }).then((res) => {
@@ -358,9 +386,12 @@ export default {
         }
       }).catch(err => {
         console.log('获取Context树失败:', err)
+      }).finally(() => {
+        this.loading.contextTree = false
       })
     },
     getCellTypeTree () {
+      this.loading.cellTypeTree = true
       this.$axios.post('get_cell_type_tree', {
         word: this.cell_type_input
       }).then((res) => {
@@ -372,6 +403,8 @@ export default {
         }
       }).catch(err => {
         console.log('获取Cell Type树失败:', err)
+      }).finally(() => {
+        this.loading.cellTypeTree = false
       })
     },
     handleCheckChange1 (data, checked) {
@@ -395,20 +428,15 @@ export default {
       this.getAllList()
     },
     getAllList () {
-      // 添加加载状态
-      this.$loading({
-        lock: true,
-        text: '正在加载数据...',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      })
+      // 设置结果加载状态
+      this.loading.results = true
       
       // 使用异步方式并行加载数据
       Promise.all([
         this.getImgList(),
         this.getTableList()
       ]).finally(() => {
-        this.$loading().close()
+        this.loading.results = false
         // 异步滚动，避免阻塞UI
         this.$nextTick(() => {
           requestAnimationFrame(() => {
@@ -535,6 +563,7 @@ export default {
       this.cell_type_input = ''
       this.chartList = []
       this.tableList = []
+      this.loading.results = false
       if (this.$refs.chart) {
         this.$refs.chart.initData([])
       }
@@ -553,6 +582,12 @@ export default {
     border: 1px solid $border-color;
     border-radius: $border-radius;
     padding: 1rem;
+    
+    // 加载状态样式
+    .spinner-border {
+      width: 2rem;
+      height: 2rem;
+    }
   }
   
   .card {
@@ -567,6 +602,16 @@ export default {
   .card-header {
     background-color: $bg-secondary;
     border-bottom: 1px solid $border-color;
+  }
+  
+  // 加载状态样式
+  .spinner-border {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+  
+  .text-muted {
+    color: #6c757d !important;
   }
 }
 
