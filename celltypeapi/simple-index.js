@@ -41,11 +41,77 @@ app.use(async (ctx, next) => {
 // 数据库实例
 const db = new SQLite3Adapter()
 
+// 初始化数据库索引
+async function initDatabaseIndexes() {
+    try {
+        console.log('正在创建数据库索引...')
+        
+        // 为mesh_tree表创建索引
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_mesh_tree_mesh_name 
+            ON mesh_tree(mesh_name)
+        `)
+        
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_mesh_tree_context 
+            ON mesh_tree(context)
+        `)
+        
+        // 为source表创建索引
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_source_organism 
+            ON source(organism)
+        `)
+        
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_source_method 
+            ON source(method)
+        `)
+        
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_source_context 
+            ON source(context)
+        `)
+        
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_source_cell_types 
+            ON source(source_cell_type, target_cell_type)
+        `)
+        
+        await db.run(`
+            CREATE INDEX IF NOT EXISTS idx_source_cell_type_classes 
+            ON source(source_cell_type_class, target_cell_type_class)
+        `)
+        
+        console.log('数据库索引创建完成')
+    } catch (error) {
+        console.error('创建数据库索引失败:', error)
+    }
+}
+
+// 启动时初始化索引
+initDatabaseIndexes()
+
+// 添加缓存机制
+const treeCache = new Map()
+const CACHE_DURATION = 5 * 60 * 1000 // 5分钟缓存
+
 // 路由定义 - 修改为匹配前端期望的接口
 router.post('/api/v1/get_tree', async (ctx) => {
     try {
         const params = ctx.request.body
+        const cacheKey = `tree_${params.word || ''}`
+        
+        // 检查缓存
+        const cached = treeCache.get(cacheKey)
+        if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
+            ctx.body = cached.data
+            return
+        }
+        
+        // 优化查询 - 只查询必要的字段
         const result = await db.Db('mesh_tree')
+            .field('id, mesh_name, context, mesh_id')
             .where('mesh_name', 'like', `%${params.word || ''}%`)
             .whereOr('context', 'like', `%${params.word || ''}%`)
             .order('mesh_id', 'asc')
@@ -87,11 +153,19 @@ router.post('/api/v1/get_tree', async (ctx) => {
             })
         }
         
-        ctx.body = {
+        const response = {
             code: 200,
             msg: 'ok',
             data: elTree
         }
+        
+        // 缓存结果
+        treeCache.set(cacheKey, {
+            data: response,
+            timestamp: Date.now()
+        })
+        
+        ctx.body = response
     } catch (error) {
         console.error('获取树结构失败:', error)
         ctx.body = {
@@ -232,50 +306,44 @@ router.post('/api/v1/get_data_img', async (ctx) => {
         const { species, method, context, cell_type, check1, check2 } = params
         
         // 构建查询条件
-        let whereConditions = []
-        let queryParams = []
+        let dbQuery = db.Db('source')
         
         if (species && species !== '') {
-            whereConditions.push('organism = ?')
-            queryParams.push(species)
+            dbQuery = dbQuery.where('organism', '=', species)
         }
         
         if (method && method !== '') {
-            whereConditions.push('method = ?')
-            queryParams.push(method)
+            dbQuery = dbQuery.where('method', '=', method)
         }
         
         if (context && context !== '') {
-            whereConditions.push('context LIKE ?')
-            queryParams.push(`%${context}%`)
+            dbQuery = dbQuery.where('context', 'LIKE', `%${context}%`)
         }
         
         if (cell_type && cell_type !== '') {
-            whereConditions.push('(source_cell_type LIKE ? OR target_cell_type LIKE ?)')
-            queryParams.push(`%${cell_type}%`)
-            queryParams.push(`%${cell_type}%`)
+            dbQuery = dbQuery.where('source_cell_type', 'LIKE', `%${cell_type}%`)
+            dbQuery = dbQuery.whereOr('target_cell_type', 'LIKE', `%${cell_type}%`)
         }
         
-        let whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : ''
-        
-        // 查询数据
-        const result = await db.Db('source')
-            .where(whereClause, queryParams)
+        // 查询数据 - 只查询必要字段
+        const result = await dbQuery
+            .field('source_cell_type_class, source_cell_type, target_cell_type_class, target_cell_type, interaction_type, organism, method, context')
             .select()
         
-        // 转换为图表数据格式
+        // 转换为图表数据格式 - 修复数据格式问题
         const chartData = result.map(item => ({
             source: check1 ? item.source_cell_type_class : item.source_cell_type,
             target: check1 ? item.target_cell_type_class : item.target_cell_type,
-            source_cell_type_class: item.source_cell_type_class,
-            source_cell_type: item.source_cell_type,
-            target_cell_type_class: item.target_cell_type_class,
-            target_cell_type: item.target_cell_type,
-            interaction: item.interaction_type,
-            clear_direction: Math.random() > 0.5 ? 1 : 0, // 模拟数据
-            reciprocal_direction: Math.random() > 0.5 ? 1 : 0, // 模拟数据
-            method: 'computational', // 模拟数据
-            context: 'immune response' // 模拟数据
+            source_cell_type_class: item.source_cell_type_class || '',
+            source_cell_type: item.source_cell_type || '',
+            target_cell_type_class: item.target_cell_type_class || '',
+            target_cell_type: item.target_cell_type || '',
+            interaction: item.interaction_type || '',
+            clear_direction: 0, // 默认值，因为数据库中没有这个字段
+            reciprocal_direction: 0, // 默认值，因为数据库中没有这个字段
+            method: item.method || '',
+            context: item.context || '',
+            organism: item.organism || ''
         }))
         
         ctx.body = {
@@ -299,43 +367,51 @@ router.post('/api/v1/get_data_table', async (ctx) => {
         const { species, method, context, cell_type, check1, check2, current = 1, size = 10 } = params
         
         // 构建查询条件
-        let whereConditions = []
-        let queryParams = []
+        let dbQuery = db.Db('source')
         
         if (species && species !== '') {
-            whereConditions.push('organism = ?')
-            queryParams.push(species)
+            dbQuery = dbQuery.where('organism', '=', species)
         }
         
         if (method && method !== '') {
-            whereConditions.push('method = ?')
-            queryParams.push(method)
+            dbQuery = dbQuery.where('method', '=', method)
         }
         
         if (context && context !== '') {
-            whereConditions.push('context LIKE ?')
-            queryParams.push(`%${context}%`)
+            dbQuery = dbQuery.where('context', 'LIKE', `%${context}%`)
         }
         
         if (cell_type && cell_type !== '') {
-            whereConditions.push('(source_cell_type LIKE ? OR target_cell_type LIKE ?)')
-            queryParams.push(`%${cell_type}%`)
-            queryParams.push(`%${cell_type}%`)
+            dbQuery = dbQuery.where('source_cell_type', 'LIKE', `%${cell_type}%`)
+            dbQuery = dbQuery.whereOr('target_cell_type', 'LIKE', `%${cell_type}%`)
         }
         
-        let whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : ''
-        
         // 查询总数
-        const countResult = await db.Db('source')
-            .where(whereClause, queryParams)
-            .count('* as total')
+        const countResult = await dbQuery.count('*')
+        const totalCount = countResult[0]?.count || 0
         
-        const totalCount = countResult[0]?.total || 0
-        
-        // 查询分页数据
+        // 查询分页数据 - 重新构建查询对象
         const offset = (current - 1) * size
-        const result = await db.Db('source')
-            .where(whereClause, queryParams)
+        let pageQuery = db.Db('source')
+        
+        if (species && species !== '') {
+            pageQuery = pageQuery.where('organism', '=', species)
+        }
+        
+        if (method && method !== '') {
+            pageQuery = pageQuery.where('method', '=', method)
+        }
+        
+        if (context && context !== '') {
+            pageQuery = pageQuery.where('context', 'LIKE', `%${context}%`)
+        }
+        
+        if (cell_type && cell_type !== '') {
+            pageQuery = pageQuery.where('source_cell_type', 'LIKE', `%${cell_type}%`)
+            pageQuery = pageQuery.whereOr('target_cell_type', 'LIKE', `%${cell_type}%`)
+        }
+        
+        const result = await pageQuery
             .limit(size)
             .offset(offset)
             .select()
@@ -354,8 +430,8 @@ router.post('/api/v1/get_data_table', async (ctx) => {
             source_cell_type: item.source_cell_type,
             target_cell_type_class: item.target_cell_type_class,
             target_cell_type: item.target_cell_type,
-            clear_direction: Math.random() > 0.5 ? '1' : '0',
-            reciprocal_direction: Math.random() > 0.5 ? '1' : '0',
+            clear_direction: '0', // 默认值，因为数据库中没有这个字段
+            reciprocal_direction: '0', // 默认值，因为数据库中没有这个字段
             interaction: item.interaction_type,
             method: 'computational',
             method_details: 'Cellchat',
@@ -392,14 +468,22 @@ router.post('/api/v1/get_count', async (ctx) => {
         const params = ctx.request.body
         const { name, check } = params
         
+        console.log('get_count called with:', { name, check })
+        
         // 根据名称查询计数
         let whereCondition = check ? 'source_cell_type_class = ?' : 'source_cell_type = ?'
         
+        console.log('Using where condition:', whereCondition, 'with value:', name)
+        
         const result = await db.Db('source')
             .where(whereCondition, [name])
-            .count('* as count')
+            .count('*')
+        
+        console.log('Query result:', result)
         
         const count = result[0]?.count || 0
+        
+        console.log('Final count:', count)
         
         ctx.body = {
             code: 200,

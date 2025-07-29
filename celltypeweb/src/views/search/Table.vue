@@ -36,7 +36,7 @@
         label="Mesh Term">
         <template #default="scope">
           <div style="display:flex;flex-direction:column;">
-            <el-link class="block" v-for="(item, index) in filterId(scope.row)" :key="item" @click="go(scope.row.url[index])" type="primary">{{filterName(scope.row, index, item)}};</el-link>
+            <el-link class="block" v-for="(item, index) in filterId(scope.row)" :key="item" @click="go(scope.row.url && scope.row.url[index] ? scope.row.url[index] : '#')" type="primary">{{filterName(scope.row, index, item)}}</el-link>
           </div>
         </template>
       </el-table-column>
@@ -192,7 +192,10 @@ export default {
       return list
     },
     filterName (row, index, item) {
-      const name = row.mesh_name ? `${row.mesh_name.split('|')[index]} (${row.url[index].split('id=')[1]})` : ''
+      if (!row.mesh_name || !row.url || !row.url[index]) {
+        return item || ''
+      }
+      const name = `${row.mesh_name.split('|')[index]} (${row.url[index].split('id=')[1]})`
       return name
     },
     go (url) {

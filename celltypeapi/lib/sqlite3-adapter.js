@@ -59,16 +59,12 @@ class SQLite3Adapter {
         }
     }
 
-    // 执行SQL更新
+    // 执行SQL语句（不返回数据）
     async run(sql, params = []) {
         await this.initConnection()
         try {
             const stmt = this.connection.prepare(sql)
-            const result = stmt.run(params)
-            return {
-                lastID: result.lastInsertRowid,
-                changes: result.changes
-            }
+            return stmt.run(params)
         } catch (err) {
             console.error('SQLite3执行错误:', err)
             throw err
@@ -117,6 +113,17 @@ class SQLite3Adapter {
         return this
     }
 
+    // OFFSET
+    offset(number) {
+        if (this.limitStr) {
+            this.limitStr += ` OFFSET ${number}`
+        } else {
+            // 如果没有LIMIT，先设置一个大的LIMIT再设置OFFSET
+            this.limitStr = `LIMIT 999999 OFFSET ${number}`
+        }
+        return this
+    }
+
     // 字段选择
     field(str) {
         this.fieldStr = str
@@ -135,14 +142,14 @@ class SQLite3Adapter {
         return this
     }
 
-    // 统计数量
-    async count() {
+    // 计数查询
+    async count(field = '*') {
         try {
             let sql
             if (this.isDistinct && this.fieldStr !== '*') {
                 sql = `SELECT COUNT(DISTINCT ${this.fieldStr}) as count FROM ${this.tableName}`
             } else {
-                sql = `SELECT COUNT(*) as count FROM ${this.tableName}`
+                sql = `SELECT COUNT(${field}) as count FROM ${this.tableName}`
             }
             if (this.whereStr) {
                 sql += ` WHERE ${this.whereStr}`
@@ -153,7 +160,7 @@ class SQLite3Adapter {
             
             const result = await this.query(sql, this.whereParams || [])
             this.reset()
-            return result[0] ? result[0].count : 0
+            return result
         } catch (error) {
             this.reset()
             throw error

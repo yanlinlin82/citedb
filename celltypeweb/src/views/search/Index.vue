@@ -265,17 +265,29 @@ export default {
       this.getAllList()
     },
     getAllList () {
-      this.getImgList()
-      this.getTableList()
-      // 网页滚动
-      this.$nextTick(() => {
-        setTimeout(() => {
-          window.scrollTo(0, 600)
-        }, 500)
+      // 添加加载状态
+      this.$loading({
+        lock: true,
+        text: '正在加载数据...',
+        spinner: 'el-icon-loading',
+        background: 'rgba(0, 0, 0, 0.7)'
+      })
+      
+      Promise.all([
+        this.getImgList(),
+        this.getTableList()
+      ]).finally(() => {
+        this.$loading().close()
+        // 网页滚动
+        this.$nextTick(() => {
+          setTimeout(() => {
+            window.scrollTo(0, 600)
+          }, 500)
+        })
       })
     },
     getImgList () {
-      this.$axios.post('get_data_img', {
+      return this.$axios.post('get_data_img', {
         species: this.speciesValue,
         method: this.methodValue,
         context: this.contextVal,
@@ -295,10 +307,11 @@ export default {
         }
       }).catch(err => {
         console.log('获取图表数据失败:', err)
+        this.$message.error('获取图表数据失败')
       })
     },
     getTableList () {
-      this.$axios.post('get_data_table', {
+      return this.$axios.post('get_data_table', {
         species: this.speciesValue,
         method: this.methodValue,
         context: this.contextVal,
@@ -314,6 +327,7 @@ export default {
         }
       }).catch(err => {
         console.log('获取表格数据失败:', err)
+        this.$message.error('获取表格数据失败')
       })
     },
     // 点击每页多少条
