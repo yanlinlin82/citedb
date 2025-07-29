@@ -46,6 +46,29 @@
       <div class="text">
         If you use <span class="name">CITEdb</span>, please cite:
       </div>
+      <div class="text" style="font-size: 16px; padding: 0 30px; margin-bottom: 20px;">
+        <strong>CITEdb: a manually curated database of cell-cell interactions in human</strong><br>
+        <em>Nayang Shan, Yao Lu, Hao Guo, Dongyu Li, Jitong Jiang, Linlin Yan, Jiudong Gao, Yong Ren, Xingming Zhao, Lin Hou</em><br>
+        Bioinformatics, 2022 Nov 15;38(22):5144-5148.<br>
+        DOI: <a href="https://doi.org/10.1093/bioinformatics/btac654" target="_blank" style="color: #007bff; text-decoration: none;">10.1093/bioinformatics/btac654</a><br>
+        PMID: <a href="https://pubmed.ncbi.nlm.nih.gov/36179089/" target="_blank" style="color: #007bff; text-decoration: none;">36179089</a>
+      </div>
+      <div class="text" style="font-size: 14px; padding: 0 30px; margin-bottom: 30px; background: #f8f9fa; padding: 15px; border-radius: 5px; border-left: 4px solid #007bff;">
+        <strong>BibTeX:</strong><br>
+        <code style="font-size: 12px; line-height: 1.4;">
+@article{shan2022citedb,<br>
+&nbsp;&nbsp;title={CITEdb: a manually curated database of cell-cell interactions in human},<br>
+&nbsp;&nbsp;author={Shan, Nayang and Lu, Yao and Guo, Hao and Li, Dongyu and Jiang, Jitong and Yan, Linlin and Gao, Jiudong and Ren, Yong and Zhao, Xingming and Hou, Lin},<br>
+&nbsp;&nbsp;journal={Bioinformatics},<br>
+&nbsp;&nbsp;volume={38},<br>
+&nbsp;&nbsp;number={22},<br>
+&nbsp;&nbsp;pages={5144--5148},<br>
+&nbsp;&nbsp;year={2022},<br>
+&nbsp;&nbsp;publisher={Oxford University Press},<br>
+&nbsp;&nbsp;doi={10.1093/bioinformatics/btac654}<br>
+}
+        </code>
+      </div>
 
     </div>
     <Footer/>
