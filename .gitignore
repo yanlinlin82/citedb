@@ -1,1 +1,29 @@
+# backup files
 backup/
+
+# config files
+config/local.js
+
+# database files
+celltypeapi/database/*.db
+celltypeapi/database/*.sqlite
+
+# log files
+celltypeapi/logs/
+*.log
+
+# dependency directory
+node_modules/
+
+# build output
+celltypeweb/dist/
+celltypeweb/build/
+
+# temporary files
+*.tmp
+*.temp
+vue.config.temp.js
+
+# system files
+.DS_Store
+Thumbs.db

@@ -1,0 +1,37 @@
+[Unit]
+Description=CITEdb Cell-cell Interaction Database
+Documentation=https://github.com/your-repo/citedb
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/html/citedb
+ExecStart=/var/www/html/citedb/start-citedb.sh
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+Restart=always
+RestartSec=10
+
+# 环境变量
+Environment=NODE_ENV=production
+Environment=PORT=3000
+
+# 安全设置
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/www/html/citedb/celltypeapi/database
+ReadWritePaths=/var/www/html/citedb/celltypeapi/logs
+
+# 资源限制
+LimitNOFILE=65536
+LimitNPROC=4096
+
+[Install]
+WantedBy=multi-user.target
