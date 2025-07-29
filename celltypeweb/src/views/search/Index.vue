@@ -105,32 +105,6 @@
         </div>
       </div>
 
-      <!-- 帮助提示区域 -->
-      <div class="row mb-4">
-        <div class="col-12">
-          <div class="alert alert-info" role="alert">
-            <div class="d-flex align-items-center">
-              <i class="fas fa-info-circle fa-lg me-3"></i>
-              <div>
-                <h6 class="alert-heading mb-2">Network Graph Controls</h6>
-                <p class="mb-2">
-                  Use the <strong>Zoom In (+)</strong> and <strong>Zoom Out (-)</strong> buttons to control the network graph view. 
-                  The buttons appear when search results are displayed.
-                </p>
-                <div class="d-flex gap-3">
-                  <a href="/cite.mp4" download="CITEdb_Tutorial.mp4" class="btn btn-outline-primary btn-sm">
-                    <i class="fas fa-play-circle me-1"></i>Watch Tutorial
-                  </a>
-                  <a href="/help.pdf" download="CITEdb_Help_Manual.pdf" class="btn btn-outline-secondary btn-sm">
-                    <i class="fas fa-file-pdf me-1"></i>Download Manual
-                  </a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- 筛选条件 -->
       <div class="row mb-4">
         <div class="col-lg-8">
@@ -175,16 +149,22 @@
               </h5>
             </div>
             <div class="card-body">
-              <div class="d-grid gap-2">
-                <button @click="demo1Click" class="btn btn-success">
-                  <i class="fas fa-rocket me-2"></i>Demo1
-                </button>
-                <button @click="demo2Click" class="btn btn-success">
-                  <i class="fas fa-rocket me-2"></i>Demo2
-                </button>
-                <button @click="resetClick" class="btn btn-danger">
-                  <i class="fas fa-undo me-2"></i>Reset
-                </button>
+              <div class="row g-2">
+                <div class="col-4">
+                  <button @click="demo1Click" class="btn btn-success w-100">
+                    <i class="fas fa-rocket me-2"></i>Demo1
+                  </button>
+                </div>
+                <div class="col-4">
+                  <button @click="demo2Click" class="btn btn-success w-100">
+                    <i class="fas fa-rocket me-2"></i>Demo2
+                  </button>
+                </div>
+                <div class="col-4">
+                  <button @click="resetClick" class="btn btn-danger w-100">
+                    <i class="fas fa-undo me-2"></i>Reset
+                  </button>
+                </div>
               </div>
             </div>
           </div>
