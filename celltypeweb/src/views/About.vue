@@ -134,7 +134,7 @@ export default {
       this.log('Testing API connection...')
       try {
         const startTime = Date.now()
-        const response = await this.$axios.get('/api/v1/health')
+        const response = await this.$axios.get('health')
         const responseTime = Date.now() - startTime
         
         this.connectionStatus = true
@@ -152,7 +152,7 @@ export default {
       this.log(`Testing endpoint: ${endpoint}`)
       try {
         const startTime = Date.now()
-        const response = await this.$axios.post(`/api/v1/${endpoint}`, {})
+        const response = await this.$axios.post(endpoint, {})
         const responseTime = Date.now() - startTime
         
         this.log(`${endpoint} successful (${responseTime}ms)`)

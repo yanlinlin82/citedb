@@ -777,7 +777,7 @@ router.get('/api/v1/statistics', async (ctx) => {
                     .where('context', '!=', '')
                     .where('context', '!=', 'NA')
                     .group('context')
-                    .order('count DESC')
+                    .order('COUNT(*) DESC')
                     .limit(10)
                     .select()
                 data = contextData
@@ -790,7 +790,7 @@ router.get('/api/v1/statistics', async (ctx) => {
                     .where('source_cell_type', '!=', '')
                     .where('source_cell_type', '!=', 'NA')
                     .group('source_cell_type')
-                    .order('count DESC')
+                    .order('COUNT(*) DESC')
                     .limit(10)
                     .select()
                 data = sourceData
@@ -803,7 +803,7 @@ router.get('/api/v1/statistics', async (ctx) => {
                     .where('target_cell_type', '!=', '')
                     .where('target_cell_type', '!=', 'NA')
                     .group('target_cell_type')
-                    .order('count DESC')
+                    .order('COUNT(*) DESC')
                     .limit(10)
                     .select()
                 data = targetData
@@ -818,7 +818,7 @@ router.get('/api/v1/statistics', async (ctx) => {
                     .where('target_cell_type', '!=', '')
                     .where('target_cell_type', '!=', 'NA')
                     .group('source_cell_type, target_cell_type')
-                    .order('count DESC')
+                    .order('COUNT(*) DESC')
                     .limit(10)
                     .select()
                 data = pairsData
@@ -831,7 +831,7 @@ router.get('/api/v1/statistics', async (ctx) => {
                     .where('interaction_type', '!=', '')
                     .where('interaction_type', '!=', 'NA')
                     .group('interaction_type')
-                    .order('count DESC')
+                    .order('COUNT(*) DESC')
                     .limit(10)
                     .select()
                 data = interactionData

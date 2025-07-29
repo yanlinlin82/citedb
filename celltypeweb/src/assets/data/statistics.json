@@ -1,0 +1,87 @@
+{
+  "yearly_interactions": {
+    "title": "Interactions of each year",
+    "data": [
+      { "year": "prior to 2013", "count": 138 },
+      { "year": "2013", "count": 25 },
+      { "year": "2014", "count": 26 },
+      { "year": "2015", "count": 39 },
+      { "year": "2016", "count": 33 },
+      { "year": "2017", "count": 46 },
+      { "year": "2018", "count": 76 },
+      { "year": "2019", "count": 98 },
+      { "year": "2020", "count": 134 },
+      { "year": "2021", "count": 113 }
+    ]
+  },
+  "context_interactions": {
+    "title": "Interactions of top 10 contexts",
+    "data": [
+      { "context": "immune response", "count": 37 },
+      { "context": "bone microenvironment", "count": 24 },
+      { "context": "carcinogenesis", "count": 23 },
+      { "context": "breast cancer", "count": 22 },
+      { "context": "atherosclerotic plaque", "count": 19 },
+      { "context": "angiogenesis", "count": 18 },
+      { "context": "asthma", "count": 15 },
+      { "context": "atherosclerosis", "count": 13 },
+      { "context": "metastatic melanoma", "count": 13 },
+      { "context": "inflammation", "count": 12 }
+    ]
+  },
+  "source_cell_types": {
+    "title": "Top 10 source cell types at the class level",
+    "data": [
+      { "cell_type": "endothelial cell", "count": 83 },
+      { "cell_type": "cancer cell", "count": 69 },
+      { "cell_type": "macrophage", "count": 66 },
+      { "cell_type": "epithelial cell", "count": 50 },
+      { "cell_type": "T cell", "count": 47 },
+      { "cell_type": "fibroblast", "count": 46 },
+      { "cell_type": "stem cell", "count": 32 },
+      { "cell_type": "myeloid cell", "count": 18 },
+      { "cell_type": "stromal cell", "count": 18 },
+      { "cell_type": "dendritic cell", "count": 17 }
+    ]
+  },
+  "target_cell_types": {
+    "title": "Top 10 target cell types at the class level",
+    "data": [
+      { "cell_type": "endothelial cell", "count": 93 },
+      { "cell_type": "T cell", "count": 81 },
+      { "cell_type": "fibroblast", "count": 61 },
+      { "cell_type": "cancer cell", "count": 37 },
+      { "cell_type": "stem cell", "count": 37 },
+      { "cell_type": "epithelial cell", "count": 35 },
+      { "cell_type": "macrophage", "count": 32 },
+      { "cell_type": "bone cell", "count": 30 },
+      { "cell_type": "smooth muscle cell", "count": 20 },
+      { "cell_type": "stromal cell", "count": 20 }
+    ]
+  },
+  "cell_type_pairs": {
+    "title": "Top 10 source : target cell types at the class level",
+    "data": [
+      { "source": "cancer cell", "target": "fibroblast", "count": 17 },
+      { "source": "cancer cell", "target": "endothelial cell", "count": 15 },
+      { "source": "fibroblast", "target": "cancer cell", "count": 12 },
+      { "source": "T cell", "target": "T cell", "count": 12 },
+      { "source": "bone cell", "target": "bone cell", "count": 11 },
+      { "source": "macrophage", "target": "T cell", "count": 11 },
+      { "source": "dendritic cell", "target": "T cell", "count": 10 },
+      { "source": "myeloid cell", "target": "endothelial cell", "count": 9 },
+      { "source": "endothelial cell", "target": "stem cell", "count": 8 },
+      { "source": "stem cell", "target": "stem cell", "count": 8 }
+    ]
+  },
+  "ligand_receptor_pairs": {
+    "title": "Top ligand-receptor pairs",
+    "data": [
+      { "pair": "CXCL12:CXCR4", "count": 8 },
+      { "pair": "PGF:FLT1", "count": 6 },
+      { "pair": "CCL27:CCR10", "count": 4 },
+      { "pair": "CSF1:CSF1R", "count": 4 },
+      { "pair": "TIGIT:NECTIN2", "count": 3 }
+    ]
+  }
+}

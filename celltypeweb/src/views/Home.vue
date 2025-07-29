@@ -289,7 +289,7 @@ export default {
   methods: {
     async testAPI() {
       try {
-        const response = await this.$axios.get('/api/v1/health')
+        const response = await this.$axios.get('health')
         this.apiTestResult = {
           success: true,
           message: `API connection successful! Response: ${JSON.stringify(response.data)}`
