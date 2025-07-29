@@ -1,86 +1,121 @@
 # CITEdb: Cell-cell INTeraction DataBase
 
-## 🚀 快速开始
+> **Source Code**: This repository contains the source code for the CITEdb database described in the research paper:
+>
+> **CITEdb: a manually curated database of cell-cell interactions in human**
+> *Nayang Shan, Yao Lu, Hao Guo, Dongyu Li, Jitong Jiang, Linlin Yan, Jiudong Gao, Yong Ren, Xingming Zhao, Lin Hou*
+> Bioinformatics, 2022 Nov 15;38(22):5144-5148.
+> DOI: [10.1093/bioinformatics/btac654](https://doi.org/10.1093/bioinformatics/btac654)
+> PMID: [36179089](https://pubmed.ncbi.nlm.nih.gov/36179089/)
 
-### 1. 安装部署
+## 🚀 Quick Start
+
+### 1. Installation
 
 ```bash
-# 安装并配置服务 (默认端口: API=3000, 前端=8080)
-sudo ./scripts/install.sh
+# Install and configure services (default ports: API=3000, Frontend=8080)
+./scripts/install.sh
 
-# 自定义端口安装
-sudo ./scripts/install.sh 3000 8080
+# Custom port installation
+./scripts/install.sh 3000 8080
 ```
 
-### 2. 启动服务
+### 2. Start Services
 
 ```bash
-# 启动systemd服务
+# Start systemd service
 sudo ./scripts/manage.sh start
 
-# 或直接运行 (开发模式)
+# Or run directly (development mode)
 ./scripts/start.sh
 ```
 
-### 3. 管理服务
+### 3. Service Management
 
 ```bash
-# 查看状态
+# Check status
 ./scripts/manage.sh status
 
-# 停止服务
+# Stop service
 ./scripts/manage.sh stop
 
-# 重启服务
+# Restart service
 ./scripts/manage.sh restart
 
-# 查看日志
+# View logs
 ./scripts/manage.sh logs
 ```
 
-## 📋 系统要求
-
-- **操作系统**: Ubuntu 18.04+ 或其他Linux发行版
-- **Node.js**: 版本 16.0.0 或更高
-- **Apache2**: Web服务器
-- **内存**: 建议至少 2GB RAM
-
-## 🔧 环境准备
+### 4. Auto Update
 
 ```bash
-# 安装Node.js
+# Check and update to latest version
+./scripts/update.sh
+
+# Quiet mode (no output when no updates, suitable for crontab)
+./scripts/update.sh -q
+```
+
+#### Setup Scheduled Updates
+
+```bash
+# Edit crontab
+crontab -e
+
+# Add the following line (check for updates every hour)
+0 * * * * cd /path/to/citedb && ./scripts/update.sh -q
+
+# Or update daily at 2 AM
+0 2 * * * cd /path/to/citedb && ./scripts/update.sh -q
+```
+
+## 📋 System Requirements
+
+- **Operating System**: Ubuntu 18.04+ or other Linux distributions
+- **Node.js**: Version 16.0.0 or higher
+- **Apache2**: Web server
+- **Memory**: At least 2GB RAM recommended
+
+## 🔧 Environment Setup
+
+```bash
+# Install Node.js
 curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
-# 安装Apache2
+# Install Apache2
 sudo apt install apache2 -y
 ```
 
-## 🌐 访问地址
+## 🌐 Access URLs
 
-安装完成后，通过以下地址访问：
+After installation, access via:
 
-- **前端界面**: http://localhost
-- **后端API**: http://localhost/api
+- **Frontend Interface**: http://localhost
+- **Backend API**: http://localhost/api
 
-## 📁 项目结构
+## 📁 Project Structure
 
 ```
 citedb/
-├── celltypeapi/          # 后端API服务
-├── celltypeweb/          # 前端Vue应用
-├── scripts/              # 管理脚本
-│   ├── install.sh        # 安装脚本
-│   ├── start.sh          # 启动脚本
-│   └── manage.sh         # 服务管理
-├── config/               # 配置文件 (不纳入git)
+├── celltypeapi/          # Backend API service
+├── celltypeweb/          # Frontend Vue application
+├── scripts/              # Management scripts
+│   ├── install.sh        # Installation script
+│   ├── start.sh          # Startup script
+│   ├── manage.sh         # Service management
+│   ├── update.sh         # Auto update
+│   └── test.sh           # Test script
+├── config/               # Configuration files (not in git)
+├── LICENSE               # MIT License
 └── README.md
 ```
 
-## ⚙️ 配置说明
+## ⚙️ Configuration
 
-### 端口配置
-安装时会生成 `config/local.js` 配置文件，包含端口设置：
+### Port Configuration
+
+Installation generates `config/local.js` configuration file with port settings:
 
 ```javascript
 module.exports = {
@@ -93,71 +128,131 @@ module.exports = {
 }
 ```
 
-### 服务配置
-- **systemd服务**: `/etc/systemd/system/citedb.service`
-- **Apache配置**: `/etc/apache2/sites-available/citedb.conf`
-- **项目路径**: `/var/www/html/citedb`
+### Service Configuration
 
-## 🔍 故障排除
+- **systemd service**: `/etc/systemd/system/citedb.service`
+- **Apache config**: `/etc/apache2/sites-available/citedb.conf`
+- **Project path**: Current project directory
 
-### 常见问题
+## 🔍 Troubleshooting
 
-1. **端口被占用**
+### Common Issues
+
+1. **Port Occupied**
+
    ```bash
    sudo netstat -tlnp | grep :3000
    sudo kill -9 <PID>
    ```
 
-2. **权限问题**
+2. **Permission Issues**
+
    ```bash
-   sudo chown -R www-data:www-data /var/www/html/citedb
+   sudo chown -R www-data:www-data /path/to/citedb
    ```
 
-3. **服务启动失败**
+3. **Service Startup Failure**
+
    ```bash
    ./scripts/manage.sh status
    ./scripts/manage.sh logs
    ```
 
-### 日志位置
-- **服务日志**: `journalctl -u citedb -f`
-- **Apache日志**: `/var/log/apache2/citedb_*.log`
+4. **Update Failure**
 
-## 🔒 安全建议
+   ```bash
+   # Check git status
+   git status
 
-1. **防火墙配置**
+   # Manual update
+   git pull origin main
+   ./scripts/update.sh
+   ```
+
+### Log Locations
+
+- **Service logs**: `journalctl -u citedb -f`
+- **Apache logs**: `/var/log/apache2/citedb_*.log`
+
+## 🔒 Security Recommendations
+
+1. **Firewall Configuration**
+
    ```bash
    sudo ufw allow 80    # HTTP
    sudo ufw allow 443   # HTTPS
    ```
 
-2. **SSL证书**
+2. **SSL Certificate**
+
    ```bash
    sudo apt install certbot python3-certbot-apache
    sudo certbot --apache -d your-domain.com
    ```
 
-## 📝 开发说明
+3. **Regular Backup**
 
-### 手动启动（开发模式）
+   ```bash
+   # Backup database
+   cp celltypeapi/database/citedb.db backup/
+
+   # Backup configuration
+   cp config/local.js backup/
+   ```
+
+## 📝 Development Guide
+
+### Manual Startup (Development Mode)
+
 ```bash
-# 后端
+# Backend
 cd celltypeapi
 npm install
 node simple-index.js
 
-# 前端
+# Frontend
 cd celltypeweb
 npm install --legacy-peer-deps
 npm run serve
 ```
 
-### 数据库初始化
+### Database Initialization
+
 ```bash
 cd celltypeapi
 node setup-db.js
 ```
 
-## 📄 许可证
+### Update Process
 
-本项目采用 ISC 许可证。
+1. **Auto Update**: `./scripts/update.sh`
+2. **Manual Update**:
+
+   ```bash
+   git pull origin main
+   cd celltypeapi && npm install
+   cd ../celltypeweb && npm install --legacy-peer-deps && npm run build
+   sudo systemctl restart citedb
+   ```
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## 📚 Citation
+
+If you use this software in your research, please cite the original paper:
+
+```bibtex
+@article{shan2022citedb,
+  title={CITEdb: a manually curated database of cell-cell interactions in human},
+  author={Shan, Nayang and Lu, Yao and Guo, Hao and Li, Dongyu and Jiang, Jitong and Yan, Linlin and Gao, Jiudong and Ren, Yong and Zhao, Xingming and Hou, Lin},
+  journal={Bioinformatics},
+  volume={38},
+  number={22},
+  pages={5144--5148},
+  year={2022},
+  publisher={Oxford University Press},
+  doi={10.1093/bioinformatics/btac654}
+}
+```

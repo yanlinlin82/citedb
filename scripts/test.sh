@@ -1,37 +1,37 @@
 #!/bin/bash
 
-# CITEdb 测试脚本
+# CITEdb Test Script
 
-echo "🧪 CITEdb 测试"
+echo "🧪 CITEdb Test"
 
-# 检查配置文件
+# Check configuration file
 if [ -f "config/local.js" ]; then
-    echo "✅ 配置文件存在"
-    node -e "console.log('配置:', JSON.stringify(require('./config/local.js'), null, 2))"
+    echo "✅ Configuration file exists"
+    node -e "console.log('Config:', JSON.stringify(require('./config/local.js'), null, 2))"
 else
-    echo "❌ 配置文件不存在"
+    echo "❌ Configuration file not found"
 fi
 
-# 检查服务状态
+# Check service status
 if systemctl is-active --quiet citedb; then
-    echo "✅ 服务正在运行"
+    echo "✅ Service is running"
 else
-    echo "❌ 服务未运行"
+    echo "❌ Service is not running"
 fi
 
-# 检查端口
+# Check ports
 API_PORT=$(node -e "console.log(require('./config/local.js').api.port)" 2>/dev/null || echo "3000")
 if netstat -tuln | grep -q ":$API_PORT "; then
-    echo "✅ API端口 $API_PORT 正在监听"
+    echo "✅ API port $API_PORT is listening"
 else
-    echo "❌ API端口 $API_PORT 未监听"
+    echo "❌ API port $API_PORT is not listening"
 fi
 
-# 测试API
+# Test API
 if curl -s http://localhost/api/download/count > /dev/null 2>&1; then
-    echo "✅ API响应正常"
+    echo "✅ API responding normally"
 else
-    echo "❌ API无响应"
+    echo "❌ API not responding"
 fi
 
-echo "🎉 测试完成"
+echo "🎉 Test completed"

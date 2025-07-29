@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# CITEdb 服务管理脚本
+# CITEdb Service Management Script
 
 SERVICE="citedb"
 
@@ -27,7 +27,7 @@ case "${1:-}" in
         systemctl disable $SERVICE
         ;;
     *)
-        echo "用法: $0 {start|stop|restart|status|logs|enable|disable}"
+        echo "Usage: $0 {start|stop|restart|status|logs|enable|disable}"
         exit 1
         ;;
 esac
