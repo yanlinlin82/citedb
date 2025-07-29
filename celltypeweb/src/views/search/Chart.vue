@@ -7,21 +7,21 @@
 -->
 <template>
   <div>
-    <div v-show="chartList.length" class="tip">
+    <div v-show="chartList && chartList.length" class="tip">
       <div class="cricle"></div>self -> self
     </div>
-    <div class="plusOreduce" v-show="chartList.length">
-      <div class="btnItem" @click="plus">
-        <span class="icon">+</span>
-        <div class="txt">plus</div>
+    <div class="plusOreduce" v-show="chartList && chartList.length">
+      <div class="btnItem" @click="throttledPlus">
+        <img src="/plus.png" alt="Zoom In" class="icon-img">
+        <div class="txt">Zoom In</div>
       </div>
-      <div class="btnItem" @click="reduce">
-        <span class="icon">−</span>
-        <div class="txt">reduce</div>
+      <div class="btnItem" @click="throttledReduce">
+        <img src="/reduce.png" alt="Zoom Out" class="icon-img">
+        <div class="txt">Zoom Out</div>
       </div>
     </div>
-    <div v-show="chartList.length > 0" style="height:700px;width:1130px;margin-top: 30px" ref="echarts"></div>
-    <div class="no-records" v-show="chartList.length <= 0">
+    <div v-show="chartList && chartList.length > 0" style="height:700px;width:1130px;margin-top: 30px" ref="echarts"></div>
+    <div class="no-records" v-show="!chartList || chartList.length <= 0">
       <h1>No Records</h1>
     </div>
   </div>
@@ -29,7 +29,7 @@
 
 <script>
 import * as echarts from 'echarts'
-import { performanceMonitor } from '@/utils/performance.js'
+import { performanceMonitor, asyncProcessor } from '@/utils/performance.js'
 let agg = {}
 
 // 添加防抖函数
@@ -53,11 +53,27 @@ export default {
       isInitializing: false
     }
   },
+  created() {
+    // 使用节流函数优化缩放操作
+    this.throttledPlus = asyncProcessor.throttle(this.plus, 100)
+    this.throttledReduce = asyncProcessor.throttle(this.reduce, 100)
+  },
   beforeUnmount() {
     // 清理ECharts实例
     if (this.cakeChart) {
       this.cakeChart.dispose()
       this.cakeChart = null
+    }
+    
+    // 清理内存
+    agg = {}
+    
+    // 清理定时器
+    if (this.throttledPlus) {
+      this.throttledPlus = null
+    }
+    if (this.throttledReduce) {
+      this.throttledReduce = null
     }
   },
   methods: {
@@ -73,8 +89,11 @@ export default {
       console.log('plus clicked, series:', this.series, 'chart:', this.cakeChart)
       if (this.series && this.cakeChart) {
         this.series.zoom += 0.3
-        this.cakeChart.setOption({
-          series: [{ ...this.series, zoom: this.series.zoom }]
+        // 使用requestAnimationFrame异步更新图表
+        requestAnimationFrame(() => {
+          this.cakeChart.setOption({
+            series: [{ ...this.series, zoom: this.series.zoom }]
+          })
         })
         console.log('zoom increased to:', this.series.zoom)
       } else {
@@ -85,8 +104,11 @@ export default {
       console.log('reduce clicked, series:', this.series, 'chart:', this.cakeChart)
       if (this.series && this.cakeChart) {
         this.series.zoom -= 0.3
-        this.cakeChart.setOption({
-          series: [{ ...this.series, zoom: this.series.zoom }]
+        // 使用requestAnimationFrame异步更新图表
+        requestAnimationFrame(() => {
+          this.cakeChart.setOption({
+            series: [{ ...this.series, zoom: this.series.zoom }]
+          })
         })
         console.log('zoom decreased to:', this.series.zoom)
       } else {
@@ -95,116 +117,193 @@ export default {
     },
     // 修复防抖函数中的this上下文
     initData(list) {
-      // 使用箭头函数保持this上下文
-      const debouncedInitData = debounce((data) => {
+      // 使用新的防抖函数
+      const debouncedInitData = asyncProcessor.debounce((data) => {
         performanceMonitor.start('Chart.initData')
         
         if (this.isInitializing) return
         this.isInitializing = true
         
-        try {
-          const arr = []
-          const lineArr = []
-          const colorArr = []
-          const class_array = {}
-          agg = {}
-          
-          if (!data || data.length === 0) {
-            this.isInitializing = false
-            performanceMonitor.end('Chart.initData')
-            return
-          }
-          
-          data.forEach(item => {
-            if (this.check) {
-              item.source = item.source_cell_type_class
-              item.target = item.target_cell_type_class
-              const key = item.source + '@' + item.target
-              if (agg[key]) {
-                agg[key].push(item.interaction)
-              } else {
-                agg[key] = []
-                agg[key].push(item.interaction)
-              }
-              arr.push(item.source_cell_type_class)
-              arr.push(item.target_cell_type_class)
-              class_array[item.source_cell_type_class] = item.source_cell_type_class
-              class_array[item.target_cell_type_class] = item.target_cell_type_class
-              if (item.source_cell_type_class === item.target_cell_type_class) {
-                colorArr.push(item.source_cell_type_class)
-              }
-              item.lineId = `${item.source_cell_type_class}${item.target_cell_type_class}${item.clear_direction}${item.reciprocal_direction}`
-              lineArr.push(`${item.source_cell_type_class}${item.target_cell_type_class}${item.clear_direction}${item.reciprocal_direction}`)
-            } else {
-              item.source = item.source_cell_type
-              item.target = item.target_cell_type
-              const key = item.source + '@' + item.target
-              if (agg[key]) {
-                agg[key].push(item.interaction)
-              } else {
-                agg[key] = []
-                agg[key].push(item.interaction)
-              }
-              arr.push(item.source_cell_type)
-              arr.push(item.target_cell_type)
-              class_array[item.source_cell_type] = item.source_cell_type_class
-              class_array[item.target_cell_type] = item.target_cell_type_class
-              if (item.source_cell_type === item.target_cell_type) {
-                colorArr.push(item.source_cell_type)
-              }
-              item.lineId = `${item.source_cell_type}${item.target_cell_type}${item.clear_direction}${item.reciprocal_direction}`
-              lineArr.push(`${item.source_cell_type}${item.target_cell_type}${item.clear_direction}${item.reciprocal_direction}`)
-            }
-          })
-
-          const newLineArr = [...new Set(lineArr)]
-          const newObj = {}
-          const newList = []
-          const countList = []
-          newLineArr.forEach(item => {
-            let count = 1
-            data.forEach(ele => {
-              if (ele.lineId === item) {
-                count += 2
-              }
-            })
-            newObj[item] = count
-          })
-
-          data.forEach(item => {
-            if (!countList.includes(item.lineId)) {
-              item.count = newObj[item.lineId]
-              countList.push(item.lineId)
-              newList.push(item)
-            }
-          })
-          const newArr = [...new Set(arr)]
-          const chartData = []
-          newArr.forEach(item => {
-            chartData.push({
-              name: item,
-              color: colorArr.includes(item) ? '#ff001c' : '#3866b9',
-              type_class: class_array[item] || item // 确保有默认值
-            })
-          })
-          
-          console.log('Chart data built:', chartData)
-
-          // 异步渲染图表
-          this.$nextTick(() => {
-            this.initLinks(newList, chartData)
-            this.isInitializing = false
-            performanceMonitor.end('Chart.initData')
-          })
-        } catch (error) {
-          console.error('图表数据处理失败:', error)
-          this.isInitializing = false
-          performanceMonitor.end('Chart.initData')
-        }
+        // 使用异步方式处理大数据，避免阻塞UI
+        this.processDataAsync(data)
       }, 300)
       
       // 调用防抖函数
       debouncedInitData(list)
+    },
+    
+    // 异步处理数据
+    async processDataAsync(data) {
+      try {
+        // 如果数据量很大，使用分片处理
+        if (data && data.length > 1000) {
+          await this.processDataInChunks(data)
+        } else {
+          await this.processData(data)
+        }
+      } catch (error) {
+        console.error('图表数据处理失败:', error)
+      } finally {
+        this.isInitializing = false
+        performanceMonitor.end('Chart.initData')
+      }
+    },
+    
+    // 分片处理大数据
+    async processDataInChunks(data) {
+      const chunkSize = 500
+      const chunks = []
+      
+      for (let i = 0; i < data.length; i += chunkSize) {
+        chunks.push(data.slice(i, i + chunkSize))
+      }
+      
+      const arr = []
+      const lineArr = []
+      const colorArr = []
+      const class_array = {}
+      agg = {}
+      
+      // 分批处理数据
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        await this.processChunk(chunk, arr, lineArr, colorArr, class_array)
+        
+        // 让出控制权，避免阻塞UI
+        if (i % 5 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 0))
+        }
+      }
+      
+      // 处理结果数据
+      await this.processResults(data, arr, lineArr, colorArr, class_array)
+    },
+    
+    // 处理单个数据块
+    async processChunk(chunk, arr, lineArr, colorArr, class_array) {
+      chunk.forEach(item => {
+        if (this.check) {
+          item.source = item.source_cell_type_class
+          item.target = item.target_cell_type_class
+          const key = item.source + '@' + item.target
+          if (agg[key]) {
+            agg[key].push(item.interaction)
+          } else {
+            agg[key] = []
+            agg[key].push(item.interaction)
+          }
+          arr.push(item.source_cell_type_class)
+          arr.push(item.target_cell_type_class)
+          class_array[item.source_cell_type_class] = item.source_cell_type_class
+          class_array[item.target_cell_type_class] = item.target_cell_type_class
+          if (item.source_cell_type_class === item.target_cell_type_class) {
+            colorArr.push(item.source_cell_type_class)
+          }
+          item.lineId = `${item.source_cell_type_class}${item.target_cell_type_class}${item.clear_direction}${item.reciprocal_direction}`
+          lineArr.push(`${item.source_cell_type_class}${item.target_cell_type_class}${item.clear_direction}${item.reciprocal_direction}`)
+        } else {
+          item.source = item.source_cell_type
+          item.target = item.target_cell_type
+          const key = item.source + '@' + item.target
+          if (agg[key]) {
+            agg[key].push(item.interaction)
+          } else {
+            agg[key] = []
+            agg[key].push(item.interaction)
+          }
+          arr.push(item.source_cell_type)
+          arr.push(item.target_cell_type)
+          class_array[item.source_cell_type] = item.source_cell_type_class
+          class_array[item.target_cell_type] = item.target_cell_type_class
+          if (item.source_cell_type === item.target_cell_type) {
+            colorArr.push(item.source_cell_type)
+          }
+          item.lineId = `${item.source_cell_type}${item.target_cell_type}${item.clear_direction}${item.reciprocal_direction}`
+          lineArr.push(`${item.source_cell_type}${item.target_cell_type}${item.clear_direction}${item.reciprocal_direction}`)
+        }
+      })
+    },
+    
+    // 处理小数据量
+    async processData(data) {
+      const arr = []
+      const lineArr = []
+      const colorArr = []
+      const class_array = {}
+      agg = {}
+      
+      if (!data || data.length === 0) {
+        return
+      }
+      
+      await this.processChunk(data, arr, lineArr, colorArr, class_array)
+      await this.processResults(data, arr, lineArr, colorArr, class_array)
+    },
+    
+    // 处理结果数据
+    async processResults(data, arr, lineArr, colorArr, class_array) {
+      const newLineArr = [...new Set(lineArr)]
+      const newObj = {}
+      const newList = []
+      const countList = []
+      
+      // 异步处理连线数据
+      await this.processLinksAsync(newLineArr, data, newObj, newList, countList)
+      
+      const newArr = [...new Set(arr)]
+      const chartData = []
+      newArr.forEach(item => {
+        chartData.push({
+          name: item,
+          color: colorArr.includes(item) ? '#ff001c' : '#3866b9',
+          type_class: class_array[item] || item
+        })
+      })
+      
+      console.log('Chart data built:', chartData)
+
+      // 异步渲染图表
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          this.initLinks(newList, chartData)
+        })
+      })
+    },
+    
+    // 异步处理连线数据
+    async processLinksAsync(newLineArr, data, newObj, newList, countList) {
+      const chunkSize = 100
+      const chunks = []
+      
+      for (let i = 0; i < newLineArr.length; i += chunkSize) {
+        chunks.push(newLineArr.slice(i, i + chunkSize))
+      }
+      
+      for (let i = 0; i < chunks.length; i++) {
+        const chunk = chunks[i]
+        chunk.forEach(item => {
+          let count = 1
+          data.forEach(ele => {
+            if (ele.lineId === item) {
+              count += 2
+            }
+          })
+          newObj[item] = count
+        })
+        
+        // 让出控制权
+        if (i % 3 === 0) {
+          await new Promise(resolve => setTimeout(resolve, 0))
+        }
+      }
+      
+      data.forEach(item => {
+        if (!countList.includes(item.lineId)) {
+          item.count = newObj[item.lineId]
+          countList.push(item.lineId)
+          newList.push(item)
+        }
+      })
     },
     initLinks (list, data) {
       const links = []
@@ -353,11 +452,11 @@ export default {
         }
         
         // 异步设置选项以避免阻塞
-        setTimeout(() => {
+        requestAnimationFrame(() => {
           if (this.cakeChart) {
             this.cakeChart.setOption(option)
           }
-        }, 0)
+        })
         
       } catch (error) {
         console.error('图表初始化失败:', error)
@@ -390,44 +489,49 @@ export default {
   }
 }
 
-.plusOreduce{
-  padding-top: 20px;
+.plusOreduce {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
   display: flex;
-  justify-content: flex-end;
-  .btnItem{
+  flex-direction: column;
+  gap: 10px;
+  
+  .btnItem {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border: 2px solid #ddd;
+    border-radius: 8px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 5px;
+    justify-content: center;
     cursor: pointer;
-    padding: 8px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     
-    .icon{
-      font-size: 1.125rem; /* 18px -> 1.125rem */
-      font-weight: bold;
+    &:hover {
+      background: rgba(255, 255, 255, 1);
+      border-color: #007bff;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+    
+    .icon-img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+      margin-bottom: 4px;
+    }
+    
+    .txt {
+      font-size: 0.7rem;
+      font-weight: 600;
       color: #333;
-      width: 20px;
-      height: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    
-    .txt{
-      margin-top: 3px;
-      font-size: 0.75rem; /* 12px -> 0.75rem */
-      color: #666;
-    }
-  }
-  .btnItem:hover{
-    background-color: #f5f5f5;
-    .txt{
-      color: #5597B7;
-    }
-    .icon{
-      color: #5597B7;
+      text-align: center;
+      line-height: 1;
     }
   }
 }

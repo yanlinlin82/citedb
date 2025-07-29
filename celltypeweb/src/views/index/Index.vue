@@ -201,6 +201,58 @@
                     </div>
                   </div>
 
+                  <!-- Help & Tutorial Section -->
+                  <div class="help-tutorial-section mt-5">
+                    <h6 class="fw-bold mb-3">
+                      <i class="fas fa-question-circle me-2"></i>
+                      Help & Tutorial:
+                    </h6>
+                    <div class="row g-3">
+                      <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                          <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                              <i class="fas fa-play-circle fa-3x text-primary"></i>
+                            </div>
+                            <h6 class="card-title fw-bold">Tutorial Video</h6>
+                            <p class="card-text text-muted small mb-3">
+                              Watch our comprehensive tutorial video to learn how to use CITEdb effectively
+                            </p>
+                            <a 
+                              href="/cite.mp4" 
+                              download="CITEdb_Tutorial.mp4"
+                              class="btn btn-outline-primary btn-sm"
+                            >
+                              <i class="fas fa-download me-2"></i>
+                              Download Video
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                          <div class="card-body text-center p-4">
+                            <div class="mb-3">
+                              <i class="fas fa-file-pdf fa-3x text-danger"></i>
+                            </div>
+                            <h6 class="card-title fw-bold">Help Manual</h6>
+                            <p class="card-text text-muted small mb-3">
+                              Download our detailed help manual for complete guidance on using CITEdb
+                            </p>
+                            <a 
+                              href="/help.pdf" 
+                              download="CITEdb_Help_Manual.pdf"
+                              class="btn btn-outline-danger btn-sm"
+                            >
+                              <i class="fas fa-download me-2"></i>
+                              Download PDF
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
                   <div class="bibtex-section mt-4">
                     <h6 class="fw-bold mb-3">
                       <i class="fas fa-code me-2"></i>

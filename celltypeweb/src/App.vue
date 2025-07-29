@@ -18,7 +18,7 @@
 }
 
 html {
-  font-size: 20px; /* 设置根字体大小为20px，便于rem计算 */
+  font-size: 24px; /* 从20px增大到24px，放大两个字号 */
 }
 
 body {
@@ -232,7 +232,7 @@ p {
 /* 响应式字体大小调整 */
 @media (max-width: 768px) {
   html {
-    font-size: 18px;
+    font-size: 22px; /* 从18px增大到22px */
   }
   
   body, #app {
@@ -247,7 +247,7 @@ p {
 
 @media (max-width: 576px) {
   html {
-    font-size: 16px;
+    font-size: 20px; /* 从16px增大到20px */
   }
   
   body, #app {

@@ -56,17 +56,17 @@
               </a>
             </li>
             <li class="mb-2">
-              <a href="/help" class="text-light text-decoration-none">
-                <i class="fas fa-question-circle me-1"></i>Help
+              <a href="/help.pdf" download="CITEdb_Help_Manual.pdf" class="text-light text-decoration-none">
+                <i class="fas fa-file-pdf me-1"></i>Help Manual
               </a>
             </li>
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none">
-                <i class="fas fa-book me-1"></i>Documentation
+              <a href="/cite.mp4" download="CITEdb_Tutorial.mp4" class="text-light text-decoration-none">
+                <i class="fas fa-play-circle me-1"></i>Tutorial Video
               </a>
             </li>
             <li class="mb-2">
-              <a href="#" class="text-light text-decoration-none">
+              <a href="https://github.com/citedb/citedb/issues" target="_blank" class="text-light text-decoration-none">
                 <i class="fas fa-bug me-1"></i>Report Issue
               </a>
             </li>

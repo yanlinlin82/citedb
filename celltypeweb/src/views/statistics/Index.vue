@@ -69,12 +69,18 @@
             </div>
             <div class="card-body">
               <div class="chart-container">
-                <div v-show="target === 'first'" ref="chart1" class="chart-item"></div>
-                <div v-show="target === 'second'" ref="chart2" class="chart-item"></div>
-                <div v-show="target === 'third'" ref="chart3" class="chart-item"></div>
-                <div v-show="target === 'fourth'" ref="chart4" class="chart-item"></div>
-                <div v-show="target === 'five'" ref="chart5" class="chart-item"></div>
-                <div v-show="target === 'six'" ref="chart6" class="chart-item"></div>
+                <div v-if="loading" class="text-center py-5">
+                  <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                  <p class="mt-3 text-muted">Loading chart data...</p>
+                </div>
+                <div v-show="target === 'first' && !loading" ref="chart1" class="chart-item"></div>
+                <div v-show="target === 'second' && !loading" ref="chart2" class="chart-item"></div>
+                <div v-show="target === 'third' && !loading" ref="chart3" class="chart-item"></div>
+                <div v-show="target === 'fourth' && !loading" ref="chart4" class="chart-item"></div>
+                <div v-show="target === 'five' && !loading" ref="chart5" class="chart-item"></div>
+                <div v-show="target === 'six' && !loading" ref="chart6" class="chart-item"></div>
               </div>
             </div>
           </div>
@@ -102,7 +108,8 @@ export default {
         { value: 'fourth', label: 'Number of cell-cell interactions in the top 10 target cell types' },
         { value: 'five', label: 'Number of cell-cell interactions in the top 10 pairs of cell types' },
         { value: 'six', label: 'Number of top ligand-receptor pairs' }
-      ]
+      ],
+      loading: false
     }
   },
   mounted () {
@@ -113,284 +120,361 @@ export default {
       const option = this.chartOptions.find(opt => opt.value === this.target)
       return option ? option.label : 'Chart'
     },
-    changeTarget (event) {
-      switch (event) {
-        case 'first':
-          this.init1()
-          break
-        case 'second':
-          this.init2()
-          break
-        case 'third':
-          this.init3()
-          break
-        case 'fourth':
-          this.init4()
-          break
-        case 'five':
-          this.init5()
-          break
-        case 'six':
-          this.init6()
-          break
-        default:
-          break
+    async changeTarget (event) {
+      this.loading = true
+      try {
+        switch (event) {
+          case 'first':
+            await this.init1()
+            break
+          case 'second':
+            await this.init2()
+            break
+          case 'third':
+            await this.init3()
+            break
+          case 'fourth':
+            await this.init4()
+            break
+          case 'five':
+            await this.init5()
+            break
+          case 'six':
+            await this.init6()
+            break
+          default:
+            break
+        }
+      } catch (error) {
+        console.error('Failed to load chart data:', error)
+      } finally {
+        this.loading = false
       }
     },
-    init1 () {
-      const chart = this.$refs.chart1
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Interactions of each year',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init1 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=yearly_interactions')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const years = chartData.map(item => item.publication_year || 'Unknown')
+          const counts = chartData.map(item => item.count || 0)
+          
+          const chart = this.$refs.chart1
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Interactions of each year',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'category',
+              data: years,
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            yAxis: {
+              type: 'value',
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            series: [{
+              data: counts,
+              type: 'bar',
+              itemStyle: {
+                color: '#007bff'
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: ['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        yAxis: {
-          type: 'value',
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        series: [{
-          data: [10, 15, 25, 35, 45, 55, 65],
-          type: 'bar',
-          itemStyle: {
-            color: '#007bff'
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get yearly interactions data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading yearly interactions chart:', error)
       }
-      cakeChart.setOption(option)
     },
-    init2 () {
-      const chart = this.$refs.chart2
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Top 10 physiological contexts',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init2 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=context_interactions')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const pieData = chartData.map(item => ({
+            value: item.count || 0,
+            name: item.context || 'Unknown'
+          }))
+          
+          const chart = this.$refs.chart2
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Top 10 physiological contexts',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'item'
+            },
+            series: [{
+              type: 'pie',
+              radius: '50%',
+              data: pieData,
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'item'
-        },
-        series: [{
-          type: 'pie',
-          radius: '50%',
-          data: [
-            { value: 35, name: 'Immune response' },
-            { value: 25, name: 'Development' },
-            { value: 20, name: 'Inflammation' },
-            { value: 15, name: 'Cancer' },
-            { value: 10, name: 'Metabolism' }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get context interactions data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading context interactions chart:', error)
       }
-      cakeChart.setOption(option)
     },
-    init3 () {
-      const chart = this.$refs.chart3
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Top 10 source cell types',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init3 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=source_cell_types')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const cellTypes = chartData.map(item => item.source_cell_type || 'Unknown')
+          const counts = chartData.map(item => item.count || 0)
+          
+          const chart = this.$refs.chart3
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Top 10 source cell types',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            yAxis: {
+              type: 'category',
+              data: cellTypes,
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            series: [{
+              data: counts,
+              type: 'bar',
+              itemStyle: {
+                color: '#28a745'
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        yAxis: {
-          type: 'category',
-          data: ['T cell', 'B cell', 'Macrophage', 'Endothelial', 'Fibroblast'],
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        series: [{
-          data: [45, 35, 30, 25, 20],
-          type: 'bar',
-          itemStyle: {
-            color: '#28a745'
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get source cell types data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading source cell types chart:', error)
       }
-      cakeChart.setOption(option)
     },
-    init4 () {
-      const chart = this.$refs.chart4
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Top 10 target cell types',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init4 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=target_cell_types')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const cellTypes = chartData.map(item => item.target_cell_type || 'Unknown')
+          const counts = chartData.map(item => item.count || 0)
+          
+          const chart = this.$refs.chart4
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Top 10 target cell types',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'value',
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            yAxis: {
+              type: 'category',
+              data: cellTypes,
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            series: [{
+              data: counts,
+              type: 'bar',
+              itemStyle: {
+                color: '#ffc107'
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value',
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        yAxis: {
-          type: 'category',
-          data: ['B cell', 'T cell', 'Macrophage', 'Endothelial', 'Fibroblast'],
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        series: [{
-          data: [40, 35, 30, 25, 20],
-          type: 'bar',
-          itemStyle: {
-            color: '#ffc107'
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get target cell types data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading target cell types chart:', error)
       }
-      cakeChart.setOption(option)
     },
-    init5 () {
-      const chart = this.$refs.chart5
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Top 10 pairs of cell types',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init5 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=cell_type_pairs')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const pieData = chartData.map(item => ({
+            value: item.count || 0,
+            name: `${item.source_cell_type || 'Unknown'} - ${item.target_cell_type || 'Unknown'}`
+          }))
+          
+          const chart = this.$refs.chart5
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Top 10 pairs of cell types',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'item'
+            },
+            series: [{
+              type: 'pie',
+              radius: '50%',
+              data: pieData,
+              emphasis: {
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'item'
-        },
-        series: [{
-          type: 'pie',
-          radius: '50%',
-          data: [
-            { value: 30, name: 'T cell - B cell' },
-            { value: 25, name: 'Macrophage - T cell' },
-            { value: 20, name: 'Endothelial - T cell' },
-            { value: 15, name: 'Fibroblast - Macrophage' },
-            { value: 10, name: 'B cell - Macrophage' }
-          ],
-          emphasis: {
-            itemStyle: {
-              shadowBlur: 10,
-              shadowOffsetX: 0,
-              shadowColor: 'rgba(0, 0, 0, 0.5)'
-            }
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get cell type pairs data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading cell type pairs chart:', error)
       }
-      cakeChart.setOption(option)
     },
-    init6 () {
-      const chart = this.$refs.chart6
-      const cakeChart = echarts.init(chart)
-      const option = {
-        title: {
-          text: 'Top ligand-receptor pairs',
-          textStyle: {
-            fontSize: 16,
-            fontWeight: 'bold'
+    async init6 () {
+      try {
+        const response = await this.$axios.get('/api/v1/statistics?type=interaction_details')
+        if (response.data.msg === 'ok' && response.data.data) {
+          const chartData = response.data.data
+          const interactions = chartData.map(item => item.interaction_type || 'Unknown')
+          const counts = chartData.map(item => item.count || 0)
+          
+          const chart = this.$refs.chart6
+          const cakeChart = echarts.init(chart)
+          const option = {
+            title: {
+              text: 'Top ligand-receptor pairs',
+              textStyle: {
+                fontSize: 16,
+                fontWeight: 'bold'
+              }
+            },
+            tooltip: {
+              trigger: 'axis',
+              axisPointer: {
+                type: 'shadow'
+              }
+            },
+            grid: {
+              left: '3%',
+              right: '4%',
+              bottom: '3%',
+              containLabel: true
+            },
+            xAxis: {
+              type: 'category',
+              data: interactions,
+              axisLabel: {
+                fontSize: 12,
+                rotate: 45
+              }
+            },
+            yAxis: {
+              type: 'value',
+              axisLabel: {
+                fontSize: 12
+              }
+            },
+            series: [{
+              data: counts,
+              type: 'bar',
+              itemStyle: {
+                color: '#dc3545'
+              }
+            }]
           }
-        },
-        tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
-          }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'category',
-          data: ['IL-2/IL-2R', 'TNF/TNFR', 'IFN-γ/IFN-γR', 'IL-4/IL-4R', 'IL-6/IL-6R'],
-          axisLabel: {
-            fontSize: 12,
-            rotate: 45
-          }
-        },
-        yAxis: {
-          type: 'value',
-          axisLabel: {
-            fontSize: 12
-          }
-        },
-        series: [{
-          data: [50, 40, 35, 30, 25],
-          type: 'bar',
-          itemStyle: {
-            color: '#dc3545'
-          }
-        }]
+          cakeChart.setOption(option)
+        } else {
+          console.error('Failed to get interaction details data:', response.data)
+        }
+      } catch (error) {
+        console.error('Error loading interaction details chart:', error)
       }
-      cakeChart.setOption(option)
     }
   }
 }

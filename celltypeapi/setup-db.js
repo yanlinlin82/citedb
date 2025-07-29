@@ -71,14 +71,28 @@ function setupDatabase() {
     try {
         db.exec(`CREATE TABLE IF NOT EXISTS source (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            publication_year TEXT,
+            organism TEXT DEFAULT 'human',
+            context TEXT,
+            mesh_id TEXT,
+            mesh_term TEXT,
+            phase TEXT,
+            tissue TEXT,
+            function_name TEXT,
             source_cell_type_class TEXT,
             source_cell_type TEXT,
             target_cell_type_class TEXT,
             target_cell_type TEXT,
+            clear_direction TEXT,
+            reciprocal_direction TEXT,
             interaction_type TEXT,
-            organism TEXT DEFAULT 'human',
             method TEXT DEFAULT 'computational',
-            context TEXT,
+            method_details TEXT,
+            reference TEXT,
+            information TEXT,
+            full_pdf TEXT,
+            pmid TEXT,
+            title TEXT,
             create_time DATETIME DEFAULT CURRENT_TIMESTAMP,
             update_time DATETIME DEFAULT CURRENT_TIMESTAMP
         )`)
@@ -183,14 +197,28 @@ function importData() {
         if (source_cell_type_class && source_cell_type_class !== 'NA' && 
             source_cell_type && source_cell_type !== 'NA') {
             sourceData.push({
+                publication_year: publication_year || '',
+                organism: organism || 'human',
+                context: context || '',
+                mesh_id: mesh_id || '',
+                mesh_term: mesh_term || '',
+                phase: phase || '',
+                tissue: tissue || '',
+                function_name: function_name || '',
                 source_cell_type_class: source_cell_type_class,
                 source_cell_type: source_cell_type,
                 target_cell_type_class: target_cell_type_class || '',
                 target_cell_type: target_cell_type || '',
+                clear_direction: clear_direction || '',
+                reciprocal_direction: reciprocal_direction || '',
                 interaction_type: interaction_details || '',
-                organism: organism || 'human',
                 method: method || 'computational',
-                context: context || ''
+                method_details: method_details || '',
+                reference: reference || '',
+                information: information || '',
+                full_pdf: full_pdf || '',
+                pmid: pmid || '',
+                title: title || ''
             })
         }
     })
@@ -221,20 +249,39 @@ function importData() {
     // Insert source data
     console.log(`🔬 Preparing to insert ${sourceData.length} source records`)
     
-    const insertSource = db.prepare('INSERT INTO source (source_cell_type_class, source_cell_type, target_cell_type_class, target_cell_type, interaction_type, organism, method, context) VALUES (?, ?, ?, ?, ?, ?, ?, ?)')
+    const insertSource = db.prepare(`INSERT INTO source (
+        publication_year, organism, context, mesh_id, mesh_term, phase, tissue, function_name,
+        source_cell_type_class, source_cell_type, target_cell_type_class, target_cell_type,
+        clear_direction, reciprocal_direction, interaction_type, method, method_details,
+        reference, information, full_pdf, pmid, title
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`)
     
     const insertSourceTransaction = db.transaction(() => {
         sourceData.forEach((item, index) => {
             try {
                 insertSource.run(
+                    item.publication_year,
+                    item.organism,
+                    item.context,
+                    item.mesh_id,
+                    item.mesh_term,
+                    item.phase,
+                    item.tissue,
+                    item.function_name,
                     item.source_cell_type_class,
                     item.source_cell_type,
                     item.target_cell_type_class,
                     item.target_cell_type,
+                    item.clear_direction,
+                    item.reciprocal_direction,
                     item.interaction_type,
-                    item.organism,
                     item.method,
-                    item.context
+                    item.method_details,
+                    item.reference,
+                    item.information,
+                    item.full_pdf,
+                    item.pmid,
+                    item.title
                 )
             } catch (err) {
                 console.error(`❌ Failed to insert source data (${index + 1}):`, err)

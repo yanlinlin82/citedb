@@ -40,13 +40,20 @@
                   <thead class="table-light">
                     <tr>
                       <th>Name</th>
+                      <th>Institution</th>
                       <th>Contribution</th>
                       <th>Contact</th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="item in list2" :key="item.name">
+                    <tr v-for="item in correspondingAuthors" :key="item.name">
                       <td class="fw-bold">{{ item.name }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-university text-primary me-2"></i>
+                          {{ item.institution }}
+                        </div>
+                      </td>
                       <td>
                         <div class="d-flex align-items-center">
                           <i class="fas fa-tasks text-primary me-2"></i>
@@ -56,8 +63,8 @@
                       <td>
                         <div class="d-flex align-items-center">
                           <i class="fas fa-envelope text-success me-2"></i>
-                          <a :href="`mailto:${item.contact}`" class="text-decoration-none">
-                            {{ item.contact }}
+                          <a :href="`mailto:${item.email}`" class="text-decoration-none">
+                            {{ item.email }}
                           </a>
                         </div>
                       </td>
@@ -86,6 +93,7 @@
                   <thead class="table-light">
                     <tr>
                       <th>Name</th>
+                      <th>Institution</th>
                       <th>Contribution</th>
                       <th>Contact</th>
                     </tr>
@@ -93,6 +101,12 @@
                   <tbody>
                     <tr v-for="item in list" :key="item.name">
                       <td class="fw-bold">{{ item.name }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-university text-primary me-2"></i>
+                          {{ item.institution }}
+                        </div>
+                      </td>
                       <td>
                         <div class="d-flex align-items-center">
                           <i class="fas fa-tasks text-primary me-2"></i>
@@ -130,39 +144,57 @@ export default {
     return {
       list: [{
         name: 'Nayang Shan',
+        institution: 'Tsinghua University',
         contribution: 'Data collection',
         contact: 'shanny01@foxmail.com',
         type: 'data'
       }, {
         name: 'Dongyu Li',
+        institution: 'Tsinghua University',
         contribution: 'Data collection',
         contact: 'lidongyu16@mails.tsinghua.edu.cn',
         type: 'data'
       }, {
         name: 'Yao Lu',
+        institution: 'Tsinghua University',
         contribution: 'Data collection',
         contact: 'luytsinghua@126.com',
         type: 'data'
       }, {
         name: 'Linlin Yan',
+        institution: 'Simcere Diagnostics Inc.',
         contribution: 'Data collection',
-        contact: 'yanlinlin82@gmail.com',
+        contact: 'linlin.yan@bioinfo.app',
         type: 'data'
       }, {
         name: 'Hailong Shen',
+        institution: 'Simcere Diagnostics Inc.',
         contribution: 'Website developer',
         contact: 'hailong.shen@simceredx.com',
         type: 'developer'
       }, {
         name: 'Jiudong Gao',
+        institution: 'Simcere Diagnostics Inc.',
         contribution: 'Website developer',
-        contact: 'gaojiudong@tsinghua.edu.cn',
+        contact: 'jiudong.gao@simceredx.com',
+        type: 'developer'
+      }, {
+        name: 'Yu Zhang',
+        institution: 'Simcere Diagnostics Inc.',
+        contribution: 'Website developer',
+        contact: 'yu.zhang@simceredx.com',
         type: 'developer'
       }],
-      list2: [{
-        name: 'Linlin Yan',
-        contribution: 'Project leader',
-        contact: 'linlin.yan@bioinfo.app'
+      correspondingAuthors: [{
+        name: 'Lin Hou',
+        institution: 'Tsinghua University',
+        contribution: 'Data collection',
+        email: 'houl@tsinghua.edu.cn'
+      }, {
+        name: 'Hao Guo',
+        institution: 'Simcere Diagnostics Inc.',
+        contribution: 'Website developer',
+        email: 'hao.guo@simceredx.com'
       }]
     }
   }
@@ -194,6 +226,23 @@ export default {
     td {
       vertical-align: middle;
     }
+    
+    // 确保两个表格列宽完全一致
+    th:nth-child(1), td:nth-child(1) {
+      width: 20%; // Name column
+    }
+    
+    th:nth-child(2), td:nth-child(2) {
+      width: 30%; // Institution column
+    }
+    
+    th:nth-child(3), td:nth-child(3) {
+      width: 25%; // Contribution column
+    }
+    
+    th:nth-child(4), td:nth-child(4) {
+      width: 25%; // Contact column
+    }
   }
   
   a {
@@ -210,6 +259,24 @@ export default {
   .team-section {
     .table-responsive {
       font-size: 0.9rem;
+    }
+    
+    .table {
+      th:nth-child(1), td:nth-child(1) {
+        width: 25%;
+      }
+      
+      th:nth-child(2), td:nth-child(2) {
+        width: 25%;
+      }
+      
+      th:nth-child(3), td:nth-child(3) {
+        width: 25%;
+      }
+      
+      th:nth-child(4), td:nth-child(4) {
+        width: 25%;
+      }
     }
   }
 }

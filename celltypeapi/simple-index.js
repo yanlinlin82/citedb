@@ -690,7 +690,7 @@ router.get('/api/cell-type-tree', async (ctx) => {
     }
 })
 
-router.get('/api/download/count', async (ctx) => {
+router.get('/api/v1/download/count', async (ctx) => {
     try {
         const result = await db.Db('download').where('id', '=', 1).find()
         ctx.body = {
@@ -708,11 +708,12 @@ router.get('/api/download/count', async (ctx) => {
     }
 })
 
-router.post('/api/download/update', async (ctx) => {
+router.post('/api/v1/download/update', async (ctx) => {
     try {
         const params = ctx.request.body
         await db.Db('download').where('id', '=', 1).update({
-            count: (params.count || 0) + 1
+            count: (params.count || 0) + 1,
+            update_time: new Date().toISOString()
         }, true)
         ctx.body = {
             code: 200,
@@ -725,6 +726,132 @@ router.post('/api/download/update', async (ctx) => {
             code: 200,
             msg: 'Failed to update download count',
             data: null
+        }
+    }
+})
+
+// Get download statistics
+router.get('/api/v1/download/stats', async (ctx) => {
+    try {
+        const result = await db.Db('download').where('id', '=', 1).find()
+        ctx.body = {
+            code: 200,
+            msg: 'ok',
+            data: {
+                totalDownloads: result.count || 0,
+                lastUpdate: result.update_time || null
+            }
+        }
+    } catch (error) {
+        console.error('Failed to get download stats:', error)
+        ctx.body = {
+            code: 200,
+            msg: 'Failed to get download stats',
+            data: null
+        }
+    }
+})
+
+// Get statistics data
+router.get('/api/v1/statistics', async (ctx) => {
+    try {
+        const { type } = ctx.query
+        
+        let data = {}
+        
+        switch (type) {
+            case 'yearly_interactions':
+                // 按年份统计交互数量
+                const yearlyData = await db.Db('source')
+                    .field('publication_year, COUNT(*) as count')
+                    .group('publication_year')
+                    .order('publication_year ASC')
+                    .select()
+                data = yearlyData
+                break
+                
+            case 'context_interactions':
+                // 按生理学背景统计交互数量
+                const contextData = await db.Db('source')
+                    .field('context, COUNT(*) as count')
+                    .where('context', '!=', '')
+                    .where('context', '!=', 'NA')
+                    .group('context')
+                    .order('count DESC')
+                    .limit(10)
+                    .select()
+                data = contextData
+                break
+                
+            case 'source_cell_types':
+                // 按源细胞类型统计交互数量
+                const sourceData = await db.Db('source')
+                    .field('source_cell_type, COUNT(*) as count')
+                    .where('source_cell_type', '!=', '')
+                    .where('source_cell_type', '!=', 'NA')
+                    .group('source_cell_type')
+                    .order('count DESC')
+                    .limit(10)
+                    .select()
+                data = sourceData
+                break
+                
+            case 'target_cell_types':
+                // 按目标细胞类型统计交互数量
+                const targetData = await db.Db('source')
+                    .field('target_cell_type, COUNT(*) as count')
+                    .where('target_cell_type', '!=', '')
+                    .where('target_cell_type', '!=', 'NA')
+                    .group('target_cell_type')
+                    .order('count DESC')
+                    .limit(10)
+                    .select()
+                data = targetData
+                break
+                
+            case 'cell_type_pairs':
+                // 按细胞类型对统计交互数量
+                const pairsData = await db.Db('source')
+                    .field('source_cell_type, target_cell_type, COUNT(*) as count')
+                    .where('source_cell_type', '!=', '')
+                    .where('source_cell_type', '!=', 'NA')
+                    .where('target_cell_type', '!=', '')
+                    .where('target_cell_type', '!=', 'NA')
+                    .group('source_cell_type, target_cell_type')
+                    .order('count DESC')
+                    .limit(10)
+                    .select()
+                data = pairsData
+                break
+                
+            case 'interaction_details':
+                // 按交互详情统计
+                const interactionData = await db.Db('source')
+                    .field('interaction_type, COUNT(*) as count')
+                    .where('interaction_type', '!=', '')
+                    .where('interaction_type', '!=', 'NA')
+                    .group('interaction_type')
+                    .order('count DESC')
+                    .limit(10)
+                    .select()
+                data = interactionData
+                break
+                
+            default:
+                data = { error: 'Invalid statistics type' }
+        }
+        
+        ctx.body = {
+            code: 200,
+            msg: 'ok',
+            data: data
+        }
+    } catch (error) {
+        console.error('Failed to get statistics:', error)
+        ctx.body = {
+            code: 200,
+            msg: 'Failed to get statistics',
+            data: []
         }
     }
 })
@@ -754,8 +881,10 @@ app.listen(PORT, () => {
     console.log(`   POST /api/v1/get_count`)
     console.log(`   GET  /api/tree`)
     console.log(`   GET  /api/cell-type-tree`)
-    console.log(`   GET  /api/download/count`)
-    console.log(`   POST /api/download/update`)
+    console.log(`   GET  /api/v1/download/count`)
+    console.log(`   POST /api/v1/download/update`)
+    console.log(`   GET  /api/v1/download/stats`)
+    console.log(`   GET  /api/v1/statistics`)
     console.log('='.repeat(50))
     console.log('🔧 Configuration:')
     console.log(`   Port: ${PORT}`)

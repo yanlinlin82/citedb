@@ -43,15 +43,15 @@
           </div>
         </div>
       </div>
-      <div v-show="chartList.length" class="tip">
+      <div v-show="chartList && chartList.length" class="tip">
         <div class="cricle"></div>self -> self
       </div>
-      <div v-show="chartList.length" ref="chart1" style="height:700px;width:1130px;margin-top: 30px" />
-      <div v-show="chartList.length === 0" class="empty">No Records</div>
+      <div v-show="chartList && chartList.length" ref="chart1" style="height:700px;width:1130px;margin-top: 30px" />
+      <div v-show="!chartList || chartList.length === 0" class="empty">No Records</div>
       <div class="table-wrap">
         <div class="flex margin-b">
           <div class="label">Result</div>
-          <el-button :disabled="chartList.length === 0" @click="download" type="primary">Download</el-button>
+          <el-button :disabled="!chartList || chartList.length === 0" @click="download" type="primary">Download</el-button>
         </div>
         <el-table
           :data="tableList"

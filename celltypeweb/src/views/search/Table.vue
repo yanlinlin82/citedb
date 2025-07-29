@@ -8,8 +8,23 @@
 <template>
   <div>
     <div class="downloadBox">
-      <h2>Result</h2>
-      <el-button :disabled="chartList.length === 0" @click="download" type="primary">Download</el-button>
+      <div class="download-info">
+        <h2>Result</h2>
+        <div class="download-stats">
+          <span class="download-count">Downloads: {{ downloadCount }}</span>
+          <span class="last-download" v-if="lastDownloadTime">
+            Last: {{ formatTime(lastDownloadTime) }}
+          </span>
+        </div>
+      </div>
+      <el-button 
+        :disabled="!chartList || chartList.length === 0" 
+        @click="download" 
+        type="primary"
+        :loading="downloading"
+      >
+        {{ downloading ? 'Downloading...' : 'Download Excel' }}
+      </el-button>
     </div>
     <el-table
       :data="tableList"
@@ -177,8 +192,56 @@
 import { export_json_to_excel } from '@/utils/Export2Excel'
 export default {
   props: ['total', 'size', 'tableList', 'chartList'],
+  data() {
+    return {
+      downloadCount: 0,
+      lastDownloadTime: null,
+      downloading: false
+    }
+  },
+  async mounted() {
+    // 获取当前下载次数
+    await this.getDownloadCount()
+  },
   methods: {
-    //
+    // 获取下载次数
+    async getDownloadCount() {
+      try {
+        const response = await this.$axios.get('/api/v1/download/count')
+        if (response.msg === 'ok' && response.data) {
+          this.downloadCount = response.data.count || 0
+        } else {
+          console.warn('Download count API returned unexpected response:', response)
+          this.downloadCount = 0
+        }
+      } catch (error) {
+        console.error('Failed to get download count:', error)
+        // 如果API失败，设置默认值，不影响用户体验
+        this.downloadCount = 0
+      }
+    },
+    
+    // 更新下载次数
+    async updateDownloadCount() {
+      try {
+        const response = await this.$axios.post('/api/v1/download/update', {
+          count: this.downloadCount
+        })
+        if (response.msg === 'ok') {
+          this.downloadCount++
+          console.log('Download count updated successfully:', this.downloadCount)
+        } else {
+          console.warn('Download count update returned unexpected response:', response)
+          // 即使API返回错误，也增加本地计数
+          this.downloadCount++
+        }
+      } catch (error) {
+        console.error('Failed to update download count:', error)
+        // 即使API失败，也增加本地计数，确保用户体验不受影响
+        this.downloadCount++
+      }
+    },
+    
     // 点击每页多少条
     handleSizeChange (val) {
       this.$emit('handleSizeChange', val)
@@ -202,6 +265,15 @@ export default {
       window.open(url)
     },
     download () {
+      // 检查chartList是否存在
+      if (!this.chartList || this.chartList.length === 0) {
+        this.$message.warning('No data available for download')
+        return
+      }
+      
+      // 显示下载开始提示
+      this.$message.info(`Preparing ${this.chartList.length} records for download...`)
+      
       // 列表标题
       const tHeader = [
         'Publication year',
@@ -254,8 +326,44 @@ export default {
       ]
       // 数据整理
       const data = this.chartList.map(v => filterVal.map(j => v[j]))
-      // 导出
-      export_json_to_excel(tHeader, data, 'Result')
+      
+      // 开始下载
+      this.downloading = true;
+      
+      // 导出Excel文件
+      export_json_to_excel(tHeader, data, 'CITEdb_Result')
+        .then(async () => {
+          // 更新服务器数据库中的下载次数
+          await this.updateDownloadCount();
+          this.lastDownloadTime = new Date();
+          this.downloading = false;
+          
+          this.$message.success(`Download completed! File contains ${this.chartList.length} records.`);
+        })
+        .catch(error => {
+          console.error('Download failed:', error);
+          this.downloading = false;
+          this.$message.error('Download failed. Please try again.');
+        });
+    },
+    formatTime(timestamp) {
+      if (!timestamp) return '';
+      
+      let date;
+      if (typeof timestamp === 'string') {
+        date = new Date(timestamp);
+      } else {
+        date = new Date(timestamp);
+      }
+      
+      if (isNaN(date.getTime())) return '';
+      
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, '0');
+      const day = String(date.getDate()).padStart(2, '0');
+      const hours = String(date.getHours()).padStart(2, '0');
+      const minutes = String(date.getMinutes()).padStart(2, '0');
+      return `${year}-${month}-${day} ${hours}:${minutes}`;
     }
   }
 }
@@ -268,5 +376,67 @@ export default {
     justify-content: space-between;
     align-items: center;
     padding: 20px 0;
+    border-bottom: 1px solid #ebeef5;
+    margin-bottom: 20px;
+  }
+  .download-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    
+    h2 {
+      margin: 0 0 8px 0;
+      color: #303133;
+      font-size: 1.5rem;
+      font-weight: 600;
+    }
+  }
+  .download-stats {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin-top: 5px;
+    font-size: 0.875rem;
+    color: #606266;
+    
+    .download-count {
+      margin-right: 15px;
+      padding: 4px 8px;
+      background-color: #f0f9ff;
+      border: 1px solid #b3d8ff;
+      border-radius: 4px;
+      color: #409eff;
+      font-weight: 500;
+    }
+    
+    .last-download {
+      font-style: italic;
+      color: #909399;
+    }
+  }
+  .download-history {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #f5f7fa;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+    width: 100%;
+
+    .history-title {
+      font-size: 0.9rem;
+      color: #303133;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .history-list {
+      font-size: 0.8rem;
+      color: #606266;
+      line-height: 1.5;
+
+      .history-item {
+        padding: 4px 0;
+      }
+    }
   }
 </style>

@@ -122,21 +122,32 @@ function formatJson(jsonData) {
     console.log(jsonData)
 }
 export function export_json_to_excel(th, jsonData, defaultTitle) {
+    return new Promise((resolve, reject) => {
+        try {
+            /* original data */
+            var data = jsonData;
+            data.unshift(th);
+            var ws_name = "SheetJS";
 
-    /* original data */
+            var wb = new Workbook(), ws = sheet_from_array_of_arrays(data);
 
-    var data = jsonData;
-    data.unshift(th);
-    var ws_name = "SheetJS";
+            /* add worksheet to workbook */
+            wb.SheetNames.push(ws_name);
+            wb.Sheets[ws_name] = ws;
 
-    var wb = new Workbook(), ws = sheet_from_array_of_arrays(data);
-
-
-    /* add worksheet to workbook */
-    wb.SheetNames.push(ws_name);
-    wb.Sheets[ws_name] = ws;
-
-    var wbout = XLSX.write(wb, {bookType: 'xlsx', bookSST: false, type: 'binary'});
-    var title = defaultTitle || '列表'
-    saveAs(new Blob([s2ab(wbout)], {type: "application/octet-stream"}), title + ".xlsx")
+            var wbout = XLSX.write(wb, {bookType: 'xlsx', bookSST: false, type: 'binary'});
+            var title = defaultTitle || '列表'
+            
+            // 使用异步方式保存文件
+            const blob = new Blob([s2ab(wbout)], {type: "application/octet-stream"});
+            saveAs(blob, title + ".xlsx");
+            
+            // 延迟resolve以确保文件下载完成
+            setTimeout(() => {
+                resolve();
+            }, 100);
+        } catch (error) {
+            reject(error);
+        }
+    });
 }

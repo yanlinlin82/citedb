@@ -91,6 +91,32 @@
         </div>
       </div>
 
+      <!-- 帮助提示区域 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="alert alert-info" role="alert">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-info-circle fa-lg me-3"></i>
+              <div>
+                <h6 class="alert-heading mb-2">Network Graph Controls</h6>
+                <p class="mb-2">
+                  Use the <strong>Zoom In (+)</strong> and <strong>Zoom Out (-)</strong> buttons to control the network graph view. 
+                  The buttons appear when search results are displayed.
+                </p>
+                <div class="d-flex gap-3">
+                  <a href="/cite.mp4" download="CITEdb_Tutorial.mp4" class="btn btn-outline-primary btn-sm">
+                    <i class="fas fa-play-circle me-1"></i>Watch Tutorial
+                  </a>
+                  <a href="/help.pdf" download="CITEdb_Help_Manual.pdf" class="btn btn-outline-secondary btn-sm">
+                    <i class="fas fa-file-pdf me-1"></i>Download Manual
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 筛选条件 -->
       <div class="row mb-4">
         <div class="col-lg-8">
@@ -185,22 +211,37 @@
             </div>
             <div class="card-body">
               <!-- 图表区域 -->
-              <div v-if="chartList.length > 0" class="mb-4">
-                <Chart ref="chart" />
+              <div v-if="chartList && chartList.length > 0" class="mb-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">
+                      <i class="fas fa-chart-network me-2"></i>
+                      Network Chart
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <Chart :chartList="chartList" :check="form.check1" ref="chart" />
+                  </div>
+                </div>
               </div>
-              
-              <!-- 表格区域 -->
-              <div v-if="tableList.length > 0">
-                <Table 
-                  :tableList="tableList" 
-                  :total="total"
-                  @size-change="handleSizeChange"
-                  @current-change="handleCurrentChange"
-                />
+
+              <!-- 结果表格 -->
+              <div v-if="tableList && tableList.length > 0" class="mb-4">
+                <div class="card">
+                  <div class="card-header">
+                    <h5 class="mb-0">
+                      <i class="fas fa-table me-2"></i>
+                      Result Table
+                    </h5>
+                  </div>
+                  <div class="card-body">
+                    <Table :tableList="tableList" :total="total" :size="size" :chartList="chartList" />
+                  </div>
+                </div>
               </div>
-              
-              <!-- 无数据提示 -->
-              <div v-if="chartList.length === 0 && tableList.length === 0" class="text-center py-5">
+
+              <!-- 无结果提示 -->
+              <div v-if="(!chartList || chartList.length === 0) && (!tableList || tableList.length === 0)" class="text-center py-5">
                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
                 <h5 class="text-muted">No results found</h5>
                 <p class="text-muted">Please select some criteria and try searching again.</p>
@@ -280,20 +321,30 @@ export default {
     },
     // 展开或关闭节点
     openOrCloseTree1 () {
-      if (this.$refs.tree1 && this.$refs.tree1.store && this.$refs.tree1.store.nodesMap) {
-        var nodes = this.$refs.tree1.store.nodesMap
-        for (var i in nodes) {
-          nodes[i].expanded = !this.contextFold
-        }
-      }
+      // 使用异步方式处理树节点展开/折叠
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree1 && this.$refs.tree1.store && this.$refs.tree1.store.nodesMap) {
+            var nodes = this.$refs.tree1.store.nodesMap
+            for (var i in nodes) {
+              nodes[i].expanded = !this.contextFold
+            }
+          }
+        })
+      })
     },
     openOrCloseTree2 () {
-      if (this.$refs.tree2 && this.$refs.tree2.store && this.$refs.tree2.store.nodesMap) {
-        var nodes = this.$refs.tree2.store.nodesMap
-        for (var i in nodes) {
-          nodes[i].expanded = !this.cellTypeFold
-        }
-      }
+      // 使用异步方式处理树节点展开/折叠
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree2 && this.$refs.tree2.store && this.$refs.tree2.store.nodesMap) {
+            var nodes = this.$refs.tree2.store.nodesMap
+            for (var i in nodes) {
+              nodes[i].expanded = !this.cellTypeFold
+            }
+          }
+        })
+      })
     },
     getContextTree () {
       this.$axios.post('get_tree', {
@@ -352,16 +403,20 @@ export default {
         background: 'rgba(0, 0, 0, 0.7)'
       })
       
+      // 使用异步方式并行加载数据
       Promise.all([
         this.getImgList(),
         this.getTableList()
       ]).finally(() => {
         this.$loading().close()
-        // 网页滚动
+        // 异步滚动，避免阻塞UI
         this.$nextTick(() => {
-          setTimeout(() => {
-            window.scrollTo(0, 600)
-          }, 500)
+          requestAnimationFrame(() => {
+            window.scrollTo({
+              top: 600,
+              behavior: 'smooth'
+            })
+          })
         })
       })
     },
@@ -375,17 +430,24 @@ export default {
         check2: this.form.check2
       }).then((res) => {
         if (res.msg === 'ok') {
-          this.chartList = res.data
+          this.chartList = res.data || []
           if (this.chartList.length > 0) {
+            // 使用异步方式初始化图表，避免阻塞UI
             this.$nextTick(() => {
-              if (this.$refs.chart) {
-                this.$refs.chart.initData(res.data)
-              }
+              requestAnimationFrame(() => {
+                if (this.$refs.chart) {
+                  this.$refs.chart.initData(this.chartList)
+                }
+              })
             })
           }
+        } else {
+          this.chartList = []
+          console.warn('获取图表数据失败:', res.msg)
         }
       }).catch(err => {
-        console.log('获取图表数据失败:', err)
+        console.error('获取图表数据失败:', err)
+        this.chartList = []
         this.$message.error('获取图表数据失败')
       })
     },
@@ -401,11 +463,17 @@ export default {
         size: this.size
       }).then((res) => {
         if (res.msg === 'ok') {
-          this.tableList = res.data.list
-          this.total = res.data.totalCount
+          this.tableList = res.data?.list || []
+          this.total = res.data?.totalCount || 0
+        } else {
+          this.tableList = []
+          this.total = 0
+          console.warn('获取表格数据失败:', res.msg)
         }
       }).catch(err => {
-        console.log('获取表格数据失败:', err)
+        console.error('获取表格数据失败:', err)
+        this.tableList = []
+        this.total = 0
         this.$message.error('获取表格数据失败')
       })
     },
@@ -421,32 +489,41 @@ export default {
     },
     demo1Click () {
       this.contextVal = ['immune response'].join(',')
-      if (this.$refs.tree1) {
-        this.$refs.tree1.setCheckedKeys(['CH311'])
-      }
+      // 异步设置树节点选中状态
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree1) {
+            this.$refs.tree1.setCheckedKeys(['CH311'])
+          }
+        })
+      })
       this.cellTypeVal = ''
-      if (this.$refs.tree2) {
-        this.$refs.tree2.setCheckedKeys([])
-      }
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree2) {
+            this.$refs.tree2.setCheckedKeys([])
+          }
+        })
+      })
       this.getAllList()
     },
     demo2Click () {
-      if (this.$refs.tree2) {
-        this.$refs.tree2.setCheckedKeys(['B cell', 'endothelial cell', 'fibroblast', 'macrophage', 'natural killer cell', 'T cell'])
-        const tree2 = this.$refs.tree2.getCheckedNodes()
-        const arr = []
-        tree2.forEach(item => {
-          if (!item.isFather) {
-            arr.push(item.label)
+      // 异步设置树节点选中状态
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree2) {
+            this.$refs.tree2.setCheckedKeys(['B cell', 'endothelial cell', 'fibroblast', 'macrophage', 'natural killer cell', 'T cell'])
           }
         })
-        this.cellTypeVal = arr.join(',')
-      }
+      })
       this.contextVal = ''
-      if (this.$refs.tree1) {
-        this.$refs.tree1.setCheckedKeys([])
-      }
-      this.form.check1 = true
+      this.$nextTick(() => {
+        requestAnimationFrame(() => {
+          if (this.$refs.tree1) {
+            this.$refs.tree1.setCheckedKeys([])
+          }
+        })
+      })
       this.getAllList()
     },
     resetClick () {
