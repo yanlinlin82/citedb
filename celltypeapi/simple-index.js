@@ -229,12 +229,59 @@ router.post('/api/v1/update_count', async (ctx) => {
 router.post('/api/v1/get_data_img', async (ctx) => {
     try {
         const params = ctx.request.body
-        // 这里需要根据实际需求实现图表数据查询
-        // 暂时返回空数据
+        const { species, method, context, cell_type, check1, check2 } = params
+        
+        // 构建查询条件
+        let whereConditions = []
+        let queryParams = []
+        
+        if (species && species !== '') {
+            whereConditions.push('organism = ?')
+            queryParams.push(species)
+        }
+        
+        if (method && method !== '') {
+            whereConditions.push('method = ?')
+            queryParams.push(method)
+        }
+        
+        if (context && context !== '') {
+            whereConditions.push('context LIKE ?')
+            queryParams.push(`%${context}%`)
+        }
+        
+        if (cell_type && cell_type !== '') {
+            whereConditions.push('(source_cell_type LIKE ? OR target_cell_type LIKE ?)')
+            queryParams.push(`%${cell_type}%`)
+            queryParams.push(`%${cell_type}%`)
+        }
+        
+        let whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : ''
+        
+        // 查询数据
+        const result = await db.Db('source')
+            .where(whereClause, queryParams)
+            .select()
+        
+        // 转换为图表数据格式
+        const chartData = result.map(item => ({
+            source: check1 ? item.source_cell_type_class : item.source_cell_type,
+            target: check1 ? item.target_cell_type_class : item.target_cell_type,
+            source_cell_type_class: item.source_cell_type_class,
+            source_cell_type: item.source_cell_type,
+            target_cell_type_class: item.target_cell_type_class,
+            target_cell_type: item.target_cell_type,
+            interaction: item.interaction_type,
+            clear_direction: Math.random() > 0.5 ? 1 : 0, // 模拟数据
+            reciprocal_direction: Math.random() > 0.5 ? 1 : 0, // 模拟数据
+            method: 'computational', // 模拟数据
+            context: 'immune response' // 模拟数据
+        }))
+        
         ctx.body = {
             code: 200,
             msg: 'ok',
-            data: []
+            data: chartData
         }
     } catch (error) {
         console.error('获取图表数据失败:', error)
@@ -249,14 +296,82 @@ router.post('/api/v1/get_data_img', async (ctx) => {
 router.post('/api/v1/get_data_table', async (ctx) => {
     try {
         const params = ctx.request.body
-        // 这里需要根据实际需求实现表格数据查询
-        // 暂时返回空数据
+        const { species, method, context, cell_type, check1, check2, current = 1, size = 10 } = params
+        
+        // 构建查询条件
+        let whereConditions = []
+        let queryParams = []
+        
+        if (species && species !== '') {
+            whereConditions.push('organism = ?')
+            queryParams.push(species)
+        }
+        
+        if (method && method !== '') {
+            whereConditions.push('method = ?')
+            queryParams.push(method)
+        }
+        
+        if (context && context !== '') {
+            whereConditions.push('context LIKE ?')
+            queryParams.push(`%${context}%`)
+        }
+        
+        if (cell_type && cell_type !== '') {
+            whereConditions.push('(source_cell_type LIKE ? OR target_cell_type LIKE ?)')
+            queryParams.push(`%${cell_type}%`)
+            queryParams.push(`%${cell_type}%`)
+        }
+        
+        let whereClause = whereConditions.length > 0 ? 'WHERE ' + whereConditions.join(' AND ') : ''
+        
+        // 查询总数
+        const countResult = await db.Db('source')
+            .where(whereClause, queryParams)
+            .count('* as total')
+        
+        const totalCount = countResult[0]?.total || 0
+        
+        // 查询分页数据
+        const offset = (current - 1) * size
+        const result = await db.Db('source')
+            .where(whereClause, queryParams)
+            .limit(size)
+            .offset(offset)
+            .select()
+        
+        // 转换为表格数据格式
+        const tableData = result.map(item => ({
+            publication_year: '2021', // 模拟数据
+            organism: 'human', // 模拟数据
+            mesh_id: 'A05', // 模拟数据
+            mesh_name: 'Urogenital System', // 模拟数据
+            context: item.context || 'immune response',
+            phase: 'NA',
+            tissue: 'NA',
+            function: 'NA',
+            source_cell_type_class: item.source_cell_type_class,
+            source_cell_type: item.source_cell_type,
+            target_cell_type_class: item.target_cell_type_class,
+            target_cell_type: item.target_cell_type,
+            clear_direction: Math.random() > 0.5 ? '1' : '0',
+            reciprocal_direction: Math.random() > 0.5 ? '1' : '0',
+            interaction: item.interaction_type,
+            method: 'computational',
+            method_details: 'Cellchat',
+            reference: '34951074',
+            information: '1',
+            full_pdf: '1',
+            pmid: '34951074',
+            title: 'Understanding of mouse and human bladder at single-cell resolution'
+        }))
+        
         ctx.body = {
             code: 200,
             msg: 'ok',
             data: {
-                list: [],
-                totalCount: 0
+                list: tableData,
+                totalCount: totalCount
             }
         }
     } catch (error) {
@@ -275,11 +390,21 @@ router.post('/api/v1/get_data_table', async (ctx) => {
 router.post('/api/v1/get_count', async (ctx) => {
     try {
         const params = ctx.request.body
-        // 这里需要根据实际需求实现计数查询
+        const { name, check } = params
+        
+        // 根据名称查询计数
+        let whereCondition = check ? 'source_cell_type_class = ?' : 'source_cell_type = ?'
+        
+        const result = await db.Db('source')
+            .where(whereCondition, [name])
+            .count('* as count')
+        
+        const count = result[0]?.count || 0
+        
         ctx.body = {
             code: 200,
             msg: 'ok',
-            data: 0
+            data: count
         }
     } catch (error) {
         console.error('获取计数失败:', error)
@@ -502,4 +627,4 @@ app.listen(PORT, () => {
     console.log(`   GET  /api/download/count`)
     console.log(`   POST /api/download/update`)
     console.log('='.repeat(50))
-}) 
+})
