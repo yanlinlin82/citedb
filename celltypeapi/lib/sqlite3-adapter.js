@@ -6,7 +6,7 @@
 
 const Database = require('better-sqlite3')
 const appConfig = require('../config/database.js')
-// 这些模块在SQLite3适配器中暂时不需要，可以后续添加
+// These modules are temporarily not needed in SQLite3 adapter, can be added later
 // const HttpException = require('./exception.js')
 // const ErrorCode = require('./errorcode')
 const dayjs = require('dayjs')
@@ -31,53 +31,53 @@ class SQLite3Adapter {
         this.connection = null
     }
 
-    // 初始化数据库连接
+    // Initialize database connection
     async initConnection() {
         if (!this.connection) {
             try {
                 const dbConfig = appConfig.db
                 this.connection = new Database(dbConfig.database, dbConfig.options)
-                console.log('SQLite3连接成功')
+                console.log('SQLite3 connection successful')
                 return this.connection
             } catch (err) {
-                console.error('SQLite3连接失败:', err)
+                console.error('SQLite3 connection failed:', err)
                 throw err
             }
         }
         return this.connection
     }
 
-    // 执行SQL查询
+    // Execute SQL query
     async query(sql, params = []) {
         await this.initConnection()
         try {
             const stmt = this.connection.prepare(sql)
             return stmt.all(params)
         } catch (err) {
-            console.error('SQLite3查询错误:', err)
+            console.error('SQLite3 query error:', err)
             throw err
         }
     }
 
-    // 执行SQL语句（不返回数据）
+    // Execute SQL statement (no data returned)
     async run(sql, params = []) {
         await this.initConnection()
         try {
             const stmt = this.connection.prepare(sql)
             return stmt.run(params)
         } catch (err) {
-            console.error('SQLite3执行错误:', err)
+            console.error('SQLite3 execution error:', err)
             throw err
         }
     }
 
-    // 设置表名
+    // Set table name
     Db(tableName) {
         this.tableName = tableName
         return this
     }
 
-    // WHERE条件
+    // WHERE condition
     where(param, condition, value) {
         if (this.whereStr) {
             this.whereStr += ` AND ${param} ${condition} ?`
@@ -89,7 +89,7 @@ class SQLite3Adapter {
         return this
     }
 
-    // WHERE OR条件
+    // WHERE OR condition
     whereOr(param, condition, value) {
         if (this.whereStr) {
             this.whereStr += ` OR ${param} ${condition} ?`
@@ -118,13 +118,13 @@ class SQLite3Adapter {
         if (this.limitStr) {
             this.limitStr += ` OFFSET ${number}`
         } else {
-            // 如果没有LIMIT，先设置一个大的LIMIT再设置OFFSET
+            // If no LIMIT, set a large LIMIT first then set OFFSET
             this.limitStr = `LIMIT 999999 OFFSET ${number}`
         }
         return this
     }
 
-    // 字段选择
+    // Field selection
     field(str) {
         this.fieldStr = str
         return this
@@ -142,7 +142,7 @@ class SQLite3Adapter {
         return this
     }
 
-    // 计数查询
+    // Count query
     async count(field = '*') {
         try {
             let sql
@@ -167,7 +167,7 @@ class SQLite3Adapter {
         }
     }
 
-    // 查找单条记录
+    // Find single record
     async find() {
         try {
             let sql = `SELECT ${this.isDistinct ? 'DISTINCT ' : ''}${this.fieldStr} FROM ${this.tableName}`
@@ -191,7 +191,7 @@ class SQLite3Adapter {
         }
     }
 
-    // 查询多条记录
+    // Query multiple records
     async select() {
         try {
             let sql = `SELECT ${this.isDistinct ? 'DISTINCT ' : ''}${this.fieldStr} FROM ${this.tableName}`
@@ -217,24 +217,31 @@ class SQLite3Adapter {
         }
     }
 
-    // 更新记录
+    // Update records
     async update(obj, isAutoTime = false) {
         try {
-            if (isAutoTime) {
-                obj.update_time = dayjs().format('YYYY-MM-DD HH:mm:ss')
+            let updateFields = []
+            let updateValues = []
+            
+            for (let key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    updateFields.push(`${key} = ?`)
+                    updateValues.push(obj[key])
+                }
             }
             
-            const keys = Object.keys(obj)
-            const values = Object.values(obj)
-            const setStr = keys.map(key => `${key} = ?`).join(', ')
+            if (isAutoTime) {
+                updateFields.push('update_time = ?')
+                updateValues.push(dayjs().format('YYYY-MM-DD HH:mm:ss'))
+            }
             
-            let sql = `UPDATE ${this.tableName} SET ${setStr}`
+            let sql = `UPDATE ${this.tableName} SET ${updateFields.join(', ')}`
             if (this.whereStr) {
                 sql += ` WHERE ${this.whereStr}`
-                values.push(...(this.whereParams || []))
+                updateValues = updateValues.concat(this.whereParams || [])
             }
             
-            const result = await this.run(sql, values)
+            const result = await this.run(sql, updateValues)
             this.reset()
             return result
         } catch (error) {
@@ -243,20 +250,28 @@ class SQLite3Adapter {
         }
     }
 
-    // 插入记录
+    // Insert record
     async insert(obj, isAutoTime = false) {
         try {
-            if (isAutoTime) {
-                obj.create_time = dayjs().format('YYYY-MM-DD HH:mm:ss')
-                obj.update_time = dayjs().format('YYYY-MM-DD HH:mm:ss')
+            let keys = []
+            let values = []
+            let placeholders = []
+            
+            for (let key in obj) {
+                if (obj.hasOwnProperty(key)) {
+                    keys.push(key)
+                    values.push(obj[key])
+                    placeholders.push('?')
+                }
             }
             
-            const keys = Object.keys(obj)
-            const values = Object.values(obj)
-            const placeholders = keys.map(() => '?').join(', ')
+            if (isAutoTime) {
+                keys.push('create_time', 'update_time')
+                values.push(dayjs().format('YYYY-MM-DD HH:mm:ss'), dayjs().format('YYYY-MM-DD HH:mm:ss'))
+                placeholders.push('?', '?')
+            }
             
-            const sql = `INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders})`
-            
+            const sql = `INSERT INTO ${this.tableName} (${keys.join(', ')}) VALUES (${placeholders.join(', ')})`
             const result = await this.run(sql, values)
             this.reset()
             return result
@@ -266,7 +281,7 @@ class SQLite3Adapter {
         }
     }
 
-    // 删除记录
+    // Delete records
     async delete() {
         try {
             let sql = `DELETE FROM ${this.tableName}`
@@ -283,13 +298,13 @@ class SQLite3Adapter {
         }
     }
 
-    // 调试模式
+    // Debug mode
     debug(val = true) {
         this.isDeBug = val
         return this
     }
 
-    // 关闭连接
+    // Close database connection
     close() {
         if (this.connection) {
             this.connection.close()
@@ -297,13 +312,14 @@ class SQLite3Adapter {
         }
     }
 
-    // 重置查询状态
+    // Reset query builder state
     reset() {
         this.tableName = ''
         this.aliasStr = ''
         this.joinStr = ''
         this.fieldStr = '*'
         this.whereStr = ''
+        this.whereParams = []
         this.limitStr = ''
         this.keyStr = ''
         this.valueStr = ''
@@ -312,7 +328,7 @@ class SQLite3Adapter {
         this.groupStr = ''
         this.isDistinct = ''
         this.sql = ''
-        this.whereParams = []
+        this.isDeBug = false
     }
 }
 

@@ -12,25 +12,25 @@ const SQLite3Adapter = require('./lib/sqlite3-adapter.js')
 const app = new Koa()
 const router = new Router()
 
-// 中间件
+// Middleware
 app.use(bodyParser())
 
-// 添加错误处理中间件
+// Add error handling middleware
 app.use(async (ctx, next) => {
     try {
         await next()
     } catch (err) {
-        console.error('API错误:', err)
+        console.error('API Error:', err)
         ctx.status = err.status || 500
         ctx.body = {
             code: 200,
-            msg: err.message || '服务器内部错误',
+            msg: err.message || 'Internal Server Error',
             data: null
         }
     }
 })
 
-// 添加请求日志中间件
+// Add request logging middleware
 app.use(async (ctx, next) => {
     const start = Date.now()
     await next()
@@ -38,15 +38,46 @@ app.use(async (ctx, next) => {
     console.log(`${ctx.method} ${ctx.url} - ${ctx.status} - ${ms}ms`)
 })
 
-// 数据库实例
+// Database instance
 const db = new SQLite3Adapter()
 
-// 初始化数据库索引
+// Database startup validation
+async function validateDatabase() {
+    try {
+        const config = require('./config/database.js')
+        const dbPath = config.db.database
+        
+        console.log('🔍 Database file path:', dbPath)
+        console.log('📊 Validating database data...')
+        
+        // Validate database connection and data
+        const meshTreeCount = await db.query('SELECT COUNT(*) as count FROM mesh_tree')
+        const sourceCount = await db.query('SELECT COUNT(*) as count FROM source')
+        
+        console.log(`✅ mesh_tree table records: ${meshTreeCount[0].count}`)
+        console.log(`✅ source table records: ${sourceCount[0].count}`)
+        
+        if (meshTreeCount[0].count === 0 && sourceCount[0].count === 0) {
+            console.warn('⚠️  Warning: No data in database, please check if data import was successful')
+        } else {
+            console.log('🎉 Database validation successful, data is normal')
+        }
+        
+    } catch (error) {
+        console.error('❌ Database validation failed:', error)
+        process.exit(1)
+    }
+}
+
+// Validate database on startup
+validateDatabase()
+
+// Initialize database indexes
 async function initDatabaseIndexes() {
     try {
-        console.log('正在创建数据库索引...')
+        console.log('Creating database indexes...')
         
-        // 为mesh_tree表创建索引
+        // Create index for mesh_tree table
         await db.run(`
             CREATE INDEX IF NOT EXISTS idx_mesh_tree_mesh_name 
             ON mesh_tree(mesh_name)
@@ -57,7 +88,7 @@ async function initDatabaseIndexes() {
             ON mesh_tree(context)
         `)
         
-        // 为source表创建索引
+        // Create index for source table
         await db.run(`
             CREATE INDEX IF NOT EXISTS idx_source_organism 
             ON source(organism)
@@ -83,33 +114,33 @@ async function initDatabaseIndexes() {
             ON source(source_cell_type_class, target_cell_type_class)
         `)
         
-        console.log('数据库索引创建完成')
+        console.log('Database indexes created')
     } catch (error) {
-        console.error('创建数据库索引失败:', error)
+        console.error('Failed to create database indexes:', error)
     }
 }
 
-// 启动时初始化索引
+// Initialize indexes on startup
 initDatabaseIndexes()
 
-// 添加缓存机制
+// Add caching mechanism
 const treeCache = new Map()
-const CACHE_DURATION = 5 * 60 * 1000 // 5分钟缓存
+const CACHE_DURATION = 5 * 60 * 1000 // 5 minutes cache
 
-// 路由定义 - 修改为匹配前端期望的接口
+// Route definitions - modified to match frontend expectations
 router.post('/api/v1/get_tree', async (ctx) => {
     try {
         const params = ctx.request.body
         const cacheKey = `tree_${params.word || ''}`
         
-        // 检查缓存
+        // Check cache
         const cached = treeCache.get(cacheKey)
         if (cached && (Date.now() - cached.timestamp) < CACHE_DURATION) {
             ctx.body = cached.data
             return
         }
         
-        // 优化查询 - 只查询必要的字段
+        // Optimize query - only query necessary fields
         const result = await db.Db('mesh_tree')
             .field('id, mesh_name, context, mesh_id')
             .where('mesh_name', 'like', `%${params.word || ''}%`)
@@ -117,7 +148,7 @@ router.post('/api/v1/get_tree', async (ctx) => {
             .order('mesh_id', 'asc')
             .select()
         
-        // 整理成树结构
+        // Organize into tree structure
         let tree = {}
         for (let i = 0; i < result.length; i++) {
             if (tree.hasOwnProperty(result[i].mesh_name)) {
@@ -138,10 +169,10 @@ router.post('/api/v1/get_tree', async (ctx) => {
             }
         }
         
-        // 整理成vue-element-tree结构
+        // Organize into vue-element-tree structure
         let elTree = []
         for (let o in tree) {
-            // 子节点排序,不区分大小写
+            // Sort children, case-insensitive
             tree[o].children.sort((a, b) => {
                 return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
             })
@@ -159,7 +190,7 @@ router.post('/api/v1/get_tree', async (ctx) => {
             data: elTree
         }
         
-        // 缓存结果
+        // Cache result
         treeCache.set(cacheKey, {
             data: response,
             timestamp: Date.now()
@@ -167,10 +198,10 @@ router.post('/api/v1/get_tree', async (ctx) => {
         
         ctx.body = response
     } catch (error) {
-        console.error('获取树结构失败:', error)
+        console.error('Failed to get tree structure:', error)
         ctx.body = {
             code: 200,
-            msg: '获取树结构失败',
+            msg: 'Failed to get tree structure',
             data: []
         }
     }
@@ -251,10 +282,10 @@ router.post('/api/v1/get_cell_type_tree', async (ctx) => {
             data: elTree
         }
     } catch (error) {
-        console.error('获取cell type树结构失败:', error)
+        console.error('Failed to get cell type tree structure:', error)
         ctx.body = {
             code: 200,
-            msg: '获取cell type树结构失败',
+            msg: 'Failed to get cell type tree structure',
             data: []
         }
     }
@@ -269,10 +300,10 @@ router.post('/api/v1/show_count', async (ctx) => {
             data: result
         }
     } catch (error) {
-        console.error('获取下载数量失败:', error)
+        console.error('Failed to get download count:', error)
         ctx.body = {
             code: 200,
-            msg: '获取下载数量失败',
+            msg: 'Failed to get download count',
             data: null
         }
     }
@@ -290,22 +321,22 @@ router.post('/api/v1/update_count', async (ctx) => {
             data: null
         }
     } catch (error) {
-        console.error('更新下载数量失败:', error)
+        console.error('Failed to update download count:', error)
         ctx.body = {
             code: 200,
-            msg: '更新下载数量失败',
+            msg: 'Failed to update download count',
             data: null
         }
     }
 })
 
-// 添加缺失的接口
+// Add missing interfaces
 router.post('/api/v1/get_data_img', async (ctx) => {
     try {
         const params = ctx.request.body
         const { species, method, context, cell_type, check1, check2 } = params
         
-        // 构建查询条件
+        // Build query conditions
         let dbQuery = db.Db('source')
         
         if (species && species !== '') {
@@ -325,12 +356,12 @@ router.post('/api/v1/get_data_img', async (ctx) => {
             dbQuery = dbQuery.whereOr('target_cell_type', 'LIKE', `%${cell_type}%`)
         }
         
-        // 查询数据 - 只查询必要字段
+        // Query data - only query necessary fields
         const result = await dbQuery
             .field('source_cell_type_class, source_cell_type, target_cell_type_class, target_cell_type, interaction_type, organism, method, context')
             .select()
         
-        // 转换为图表数据格式 - 修复数据格式问题
+        // Convert to chart data format - fix data format issues
         const chartData = result.map(item => ({
             source: check1 ? item.source_cell_type_class : item.source_cell_type,
             target: check1 ? item.target_cell_type_class : item.target_cell_type,
@@ -339,8 +370,8 @@ router.post('/api/v1/get_data_img', async (ctx) => {
             target_cell_type_class: item.target_cell_type_class || '',
             target_cell_type: item.target_cell_type || '',
             interaction: item.interaction_type || '',
-            clear_direction: 0, // 默认值，因为数据库中没有这个字段
-            reciprocal_direction: 0, // 默认值，因为数据库中没有这个字段
+            clear_direction: 0, // Default value, as this field is not in the database
+            reciprocal_direction: 0, // Default value, as this field is not in the database
             method: item.method || '',
             context: item.context || '',
             organism: item.organism || ''
@@ -352,10 +383,10 @@ router.post('/api/v1/get_data_img', async (ctx) => {
             data: chartData
         }
     } catch (error) {
-        console.error('获取图表数据失败:', error)
+        console.error('Failed to get chart data:', error)
         ctx.body = {
             code: 200,
-            msg: '获取图表数据失败',
+            msg: 'Failed to get chart data',
             data: []
         }
     }
@@ -366,7 +397,7 @@ router.post('/api/v1/get_data_table', async (ctx) => {
         const params = ctx.request.body
         const { species, method, context, cell_type, check1, check2, current = 1, size = 10 } = params
         
-        // 构建查询条件
+        // Build query conditions
         let dbQuery = db.Db('source')
         
         if (species && species !== '') {
@@ -386,11 +417,11 @@ router.post('/api/v1/get_data_table', async (ctx) => {
             dbQuery = dbQuery.whereOr('target_cell_type', 'LIKE', `%${cell_type}%`)
         }
         
-        // 查询总数
+        // Query total count
         const countResult = await dbQuery.count('*')
         const totalCount = countResult[0]?.count || 0
         
-        // 查询分页数据 - 重新构建查询对象
+        // Query paginated data - rebuild query object
         const offset = (current - 1) * size
         let pageQuery = db.Db('source')
         
@@ -416,12 +447,12 @@ router.post('/api/v1/get_data_table', async (ctx) => {
             .offset(offset)
             .select()
         
-        // 转换为表格数据格式
+        // Convert to table data format
         const tableData = result.map(item => ({
-            publication_year: '2021', // 模拟数据
-            organism: 'human', // 模拟数据
-            mesh_id: 'A05', // 模拟数据
-            mesh_name: 'Urogenital System', // 模拟数据
+            publication_year: '2021', // Simulated data
+            organism: 'human', // Simulated data
+            mesh_id: 'A05', // Simulated data
+            mesh_name: 'Urogenital System', // Simulated data
             context: item.context || 'immune response',
             phase: 'NA',
             tissue: 'NA',
@@ -430,8 +461,8 @@ router.post('/api/v1/get_data_table', async (ctx) => {
             source_cell_type: item.source_cell_type,
             target_cell_type_class: item.target_cell_type_class,
             target_cell_type: item.target_cell_type,
-            clear_direction: '0', // 默认值，因为数据库中没有这个字段
-            reciprocal_direction: '0', // 默认值，因为数据库中没有这个字段
+            clear_direction: '0', // Default value, as this field is not in the database
+            reciprocal_direction: '0', // Default value, as this field is not in the database
             interaction: item.interaction_type,
             method: 'computational',
             method_details: 'Cellchat',
@@ -451,10 +482,10 @@ router.post('/api/v1/get_data_table', async (ctx) => {
             }
         }
     } catch (error) {
-        console.error('获取表格数据失败:', error)
+        console.error('Failed to get table data:', error)
         ctx.body = {
             code: 200,
-            msg: '获取表格数据失败',
+            msg: 'Failed to get table data',
             data: {
                 list: [],
                 totalCount: 0
@@ -470,7 +501,7 @@ router.post('/api/v1/get_count', async (ctx) => {
         
         console.log('get_count called with:', { name, check })
         
-        // 根据名称查询计数
+        // Query count by name
         const fieldName = check ? 'source_cell_type_class' : 'source_cell_type'
         
         console.log('Using field:', fieldName, 'with value:', name)
@@ -491,16 +522,16 @@ router.post('/api/v1/get_count', async (ctx) => {
             data: count
         }
     } catch (error) {
-        console.error('获取计数失败:', error)
+        console.error('Failed to get count:', error)
         ctx.body = {
             code: 200,
-            msg: '获取计数失败',
+            msg: 'Failed to get count',
             data: 0
         }
     }
 })
 
-// 保留原有接口以兼容
+// Keep original interfaces for compatibility
 router.get('/api/tree', async (ctx) => {
     try {
         const params = ctx.query
@@ -510,7 +541,7 @@ router.get('/api/tree', async (ctx) => {
             .order('mesh_id', 'asc')
             .select()
         
-        // 整理成树结构
+        // Organize into tree structure
         let tree = {}
         for (let i = 0; i < result.length; i++) {
             if (tree.hasOwnProperty(result[i].mesh_name)) {
@@ -531,10 +562,10 @@ router.get('/api/tree', async (ctx) => {
             }
         }
         
-        // 整理成vue-element-tree结构
+        // Organize into vue-element-tree structure
         let elTree = []
         for (let o in tree) {
-            // 子节点排序,不区分大小写
+            // Sort children, case-insensitive
             tree[o].children.sort((a, b) => {
                 return a.label.toLowerCase().localeCompare(b.label.toLowerCase())
             })
@@ -552,10 +583,10 @@ router.get('/api/tree', async (ctx) => {
             data: elTree
         }
     } catch (error) {
-        console.error('获取树结构失败:', error)
+        console.error('Failed to get tree structure:', error)
         ctx.body = {
             code: 200,
-            msg: '获取树结构失败',
+            msg: 'Failed to get tree structure',
             data: []
         }
     }
@@ -636,10 +667,10 @@ router.get('/api/cell-type-tree', async (ctx) => {
             data: elTree
         }
     } catch (error) {
-        console.error('获取cell type树结构失败:', error)
+        console.error('Failed to get cell type tree structure:', error)
         ctx.body = {
             code: 200,
-            msg: '获取cell type树结构失败',
+            msg: 'Failed to get cell type tree structure',
             data: []
         }
     }
@@ -654,10 +685,10 @@ router.get('/api/download/count', async (ctx) => {
             data: result
         }
     } catch (error) {
-        console.error('获取下载数量失败:', error)
+        console.error('Failed to get download count:', error)
         ctx.body = {
             code: 200,
-            msg: '获取下载数量失败',
+            msg: 'Failed to get download count',
             data: null
         }
     }
@@ -675,30 +706,30 @@ router.post('/api/download/update', async (ctx) => {
             data: null
         }
     } catch (error) {
-        console.error('更新下载数量失败:', error)
+        console.error('Failed to update download count:', error)
         ctx.body = {
             code: 200,
-            msg: '更新下载数量失败',
+            msg: 'Failed to update download count',
             data: null
         }
     }
 })
 
-// 使用路由
+// Use routes
 app.use(router.routes())
 app.use(router.allowedMethods())
 
-// 启动服务器
+// Start server
 const appConfig = require('./config/app.js')
 const PORT = process.env.PORT || appConfig.port || 7999
 app.listen(PORT, () => {
     console.log('='.repeat(50))
-    console.log('🚀 CellTypeDB API 服务器启动成功!')
-    console.log(`📍 服务地址: http://localhost:${PORT}`)
-    console.log(`🗄️  数据库文件: ${require('./config/database.js').db.database}`)
-    console.log(`⏰ 启动时间: ${new Date().toLocaleString()}`)
+    console.log('🚀 CellTypeDB API Server Started Successfully!')
+    console.log(`📍 Service Address: http://localhost:${PORT}`)
+    console.log(`🗄️  Database File: ${require('./config/database.js').db.database}`)
+    console.log(`⏰ Startup Time: ${new Date().toLocaleString()}`)
     console.log('='.repeat(50))
-    console.log('📋 可用API端点:')
+    console.log('📋 Available API Endpoints:')
     console.log(`   POST /api/v1/get_tree`)
     console.log(`   POST /api/v1/get_cell_type_tree`)
     console.log(`   POST /api/v1/show_count`)

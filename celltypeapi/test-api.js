@@ -5,62 +5,65 @@ const SQLite3Adapter = require('./lib/sqlite3-adapter.js')
 const app = new Koa()
 app.use(bodyParser())
 
-// 数据库实例
+// Database instance
 const db = new SQLite3Adapter()
 
-// 测试API
+// Test API
 async function testAPI() {
     try {
-        console.log('开始API测试...')
+        console.log('Starting API test...')
         
-        // 测试get_data_img接口
-        const testData = {
+        // Test get_data_img interface
+        const params = {
             species: 'human',
-            method: '',
+            method: 'computational',
             context: 'immune response',
-            cell_type: '',
+            cell_type: 'T cell',
             check1: false,
             check2: false
         }
         
-        // 构建查询条件
+        // Build query conditions
         let dbQuery = db.Db('source')
-        
-        if (testData.species && testData.species !== '') {
-            dbQuery = dbQuery.where('organism', '=', testData.species)
+        if (params.species && params.species !== 'all') {
+            dbQuery = dbQuery.where('organism', '=', params.species)
+        }
+        if (params.method && params.method !== 'all') {
+            dbQuery = dbQuery.where('method', '=', params.method)
+        }
+        if (params.context && params.context !== 'all') {
+            dbQuery = dbQuery.where('context', 'LIKE', `%${params.context}%`)
+        }
+        if (params.cell_type && params.cell_type !== 'all') {
+            dbQuery = dbQuery.where('source_cell_type', 'LIKE', `%${params.cell_type}%`)
         }
         
-        if (testData.context && testData.context !== '') {
-            dbQuery = dbQuery.where('context', 'LIKE', `%${testData.context}%`)
-        }
-        
-        // 查询数据 - 只查询必要字段
+        // Query data - only query necessary fields
         const result = await dbQuery
             .field('source_cell_type_class, source_cell_type, target_cell_type_class, target_cell_type, interaction_type, organism, method, context')
             .select()
         
-        console.log('✅ get_data_img查询成功:', result.length)
-        
+        console.log('✅ get_data_img query successful:', result.length)
         if (result.length > 0) {
-            console.log('✅ 第一条数据:', Object.keys(result[0]))
+            console.log('✅ First data:', Object.keys(result[0]))
         }
         
-        // 测试get_data_table接口
+        // Test get_data_table interface
         const tableResult = await dbQuery.count('*')
-        console.log('✅ get_data_table计数成功:', tableResult[0]?.count)
+        console.log('✅ get_data_table count successful:', tableResult[0]?.count)
         
-        console.log('🎉 API测试通过!')
+        console.log('🎉 API test passed!')
         
     } catch (error) {
-        console.error('❌ API测试失败:', error)
+        console.error('❌ API test failed:', error)
     }
 }
 
-// 启动测试
+// Start test
 testAPI().then(() => {
-    console.log('测试完成')
+    console.log('Test completed')
     process.exit(0)
 }).catch(error => {
-    console.error('测试出错:', error)
+    console.error('Test error:', error)
     process.exit(1)
 })
