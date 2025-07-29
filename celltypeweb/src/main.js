@@ -5,6 +5,11 @@ import store from './store'
 import axios from './utils/axios'
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
+// Bootstrap CSS and JS
+import 'bootstrap/dist/css/bootstrap.min.css'
+import 'bootstrap/dist/js/bootstrap.bundle.min.js'
+// FontAwesome CSS
+import '@fortawesome/fontawesome-free/css/all.min.css'
 import './scss/styles.scss'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 

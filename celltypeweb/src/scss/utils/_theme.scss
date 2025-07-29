@@ -1,10 +1,57 @@
-// 开关设置
+// Bootstrap主题配色方案
+// 基于当前配色进行调整，符合Bootstrap最佳实践
 //-----------------------------------------------------
+
+// 主色调 - 基于当前的#409EFF进行调整
+$primary: #007bff;           // Bootstrap主色调
+$primary-dark: #0056b3;      // 深色主色调
+$primary-light: #e3f2fd;     // 浅色主色调
+
+// 辅助色调
+$secondary: #6c757d;         // 次要色调
+$success: #28a745;           // 成功色调
+$info: #17a2b8;              // 信息色调
+$warning: #ffc107;           // 警告色调
+$danger: #dc3545;            // 危险色调
+$light: #f8f9fa;             // 浅色背景
+$dark: #343a40;              // 深色背景
+
+// 文本颜色
+$text-primary: #2c3e50;      // 主要文本颜色
+$text-secondary: #6c757d;    // 次要文本颜色
+$text-muted: #6c757d;        // 静音文本颜色
+
+// 背景颜色
+$bg-primary: #ffffff;        // 主要背景色
+$bg-secondary: #f8f9fa;      // 次要背景色
+$bg-light: #ffffff;          // 浅色背景
+$bg-dark: #343a40;           // 深色背景
+
+// 边框颜色
+$border-color: #dee2e6;      // 边框颜色
+$border-light: #e9ecef;      // 浅色边框
+
+// 阴影
+$box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$box-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+$shadow-base: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+$shadow-hover: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+// 圆角
+$border-radius: 0.375rem;
+$border-radius-lg: 0.5rem;
+$border-radius-sm: 0.25rem;
+
+// 过渡效果
+$transition-base: all 0.15s ease-in-out;
+$transition-fade: opacity 0.15s linear;
+$transition-collapse: height 0.35s ease;
+
+// 兼容性设置
 $lte7: true !default; // 是否兼容ie6-7
-// Color
-// $color-primary: #3686DC;
+
+// 保留原有的Element Plus配色（用于兼容）
 $color-primary: #409EFF;
 $color-red: #f56c6c;
 $color-green: #67c23a;
 $color-gray: #dcdfe6;
-// $color-gray: #EBEEF5;

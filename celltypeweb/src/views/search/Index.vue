@@ -1,192 +1,271 @@
-
+<!--
+ * @page: 页面-搜索
+ * @Author: Dragon
+ * @Date: 2021-03-16 10:19:31
+ * @LastEditors: Dragon
+ * @LastEditTime: 2022-04-06 08:58:17
+-->
 <template>
-  <div class="wrap-search">
-    <NavBar current="search" />
-    <div class="content">
-      <div class="tree-box">
-        <div class="tree-box-item" style="margin-right:5px">
-          <div class="tree-box-header">
-            <h2>Context</h2>
-            <el-checkbox @change="openOrCloseTree1" v-model="contextFold">fold tree</el-checkbox>
-          </div>
-          <!-- <el-input style="margin-top:20px" v-model="context_input" placeholder="please input the content" clearable @input="getContextTree"></el-input> -->
-          <el-input style="margin-top:20px" v-model="context_input" placeholder="please input the content" clearable></el-input>
-          <div class="tree">
-            <el-tree
-              ref="tree1"
-              :data="treeList1"
-              show-checkbox
-              node-key="id"
-              empty-text="No Data"
-              :default-expand-all="true"
-              :filter-node-method="filterTree1"
-              @check="handleCheckChange1">
-            </el-tree>
+  <BaseLayout current="search">
+    <!-- 搜索区域 -->
+    <div class="search-section">
+      <div class="row">
+        <!-- Context树 -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="fas fa-sitemap me-2"></i>
+                Context
+              </h5>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="contextFold" @change="openOrCloseTree1" id="contextFold">
+                <label class="form-check-label" for="contextFold">
+                  Fold tree
+                </label>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="context_input" 
+                  placeholder="Please input the content"
+                >
+              </div>
+              <div class="tree-container">
+                <el-tree
+                  ref="tree1"
+                  :data="treeList1"
+                  show-checkbox
+                  node-key="id"
+                  empty-text="No Data"
+                  :default-expand-all="true"
+                  :filter-node-method="filterTree1"
+                  @check="handleCheckChange1">
+                </el-tree>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="tree-box-item" style="margin-left:5px">
-          <div class="tree-box-header">
-            <h2>Cell Type</h2>
-            <el-checkbox v-model="cellTypeFold" @change="openOrCloseTree2">fold tree</el-checkbox>
-          </div>
-          <!-- <el-input style="margin-top:20px" v-model="cell_type_input" placeholder="please input the content" clearable @input="getCellTypeTree"></el-input> -->
-          <el-input style="margin-top:20px" v-model="cell_type_input" placeholder="please input the content" clearable></el-input>
-          <div class="tree">
-            <el-tree
-              ref="tree2"
-              :data="treeList2"
-              show-checkbox
-              node-key="id"
-              empty-text="No Data"
-              :default-expand-all="true"
-              :filter-node-method="filterTree2"
-              @check="handleCheckChange2">
-            </el-tree>
+
+        <!-- Cell Type树 -->
+        <div class="col-lg-6 mb-4">
+          <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="fas fa-dna me-2"></i>
+                Cell Type
+              </h5>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" v-model="cellTypeFold" @change="openOrCloseTree2" id="cellTypeFold">
+                <label class="form-check-label" for="cellTypeFold">
+                  Fold tree
+                </label>
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="mb-3">
+                <input 
+                  type="text" 
+                  class="form-control" 
+                  v-model="cell_type_input" 
+                  placeholder="Please input the content"
+                >
+              </div>
+              <div class="tree-container">
+                <el-tree
+                  ref="tree2"
+                  :data="treeList2"
+                  show-checkbox
+                  node-key="id"
+                  empty-text="No Data"
+                  :default-expand-all="true"
+                  :filter-node-method="filterTree2"
+                  @check="handleCheckChange2">
+                </el-tree>
+              </div>
+            </div>
           </div>
         </div>
-      </div>
-      <div class="top">
-        <div class="top-item-box">
-          <!-- <div class="top-item">
-            <h2>Species</h2>
-            <el-select v-model="speciesValue">
-              <el-option
-                v-for="item in species"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-          </div> -->
-          <div class="top-item">
-            <h2>Method</h2>
-            <el-select
-              v-model="methodValue"
-              @change="getAllList"
-              placeholder="please select"
-              multiple
-              filterable
-              allow-create
-              default-first-option>
-              <el-option
-                v-for="item in method"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select>
-            <!-- <el-select v-model="methodValue" @change="getAllList">
-              <el-option
-                v-for="item in method"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value">
-              </el-option>
-            </el-select> -->
-          </div>
-          <!-- <div class="top-item">
-            <h2>Interaction details</h2>
-            <el-input style="width:300px" v-model="other" placeholder="please input the interaction details" clearable></el-input>
-          </div> -->
-        </div>
-        <div class="top-item-box">
-          <el-button @click="demo1Click" type="success">Demo1</el-button>
-          <el-button @click="demo2Click" type="success">Demo2</el-button>
-          <el-button @click="resetClick" type="danger">Reset</el-button>
-          <!-- <el-button @click="getAllList" type="primary">Search</el-button> -->
-        </div>
-      </div>
-      <div class="top-check">
-        <el-checkbox @change="getAllList" v-model="form.check1">Show cell-cell interactions at the class level</el-checkbox>
-        <el-checkbox @change="getAllList" v-model="form.check2">Show cell-cell interactions involving cell types of interest</el-checkbox>
       </div>
 
-      <Chart
-        :check="form.check1"
-        ref="chart"
-       :chartList="chartList"
-      />
-      <Table
-      id="table"
-        :total="total"
-        :size="size"
-        :tableList="tableList.slice((current-1) * size,current * size)"
-        :chartList="chartList"
-        @handleSizeChange="handleSizeChange"
-        @handleCurrentChange="handleCurrentChange"
-      />
+      <!-- 筛选条件 -->
+      <div class="row mb-4">
+        <div class="col-lg-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>
+                Filter Options
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <label class="form-label">Method</label>
+                  <el-select
+                    v-model="methodValue"
+                    @change="getAllList"
+                    placeholder="Please select"
+                    multiple
+                    filterable
+                    allow-create
+                    default-first-option
+                    class="w-100">
+                    <el-option
+                      v-for="item in method"
+                      :key="item.value"
+                      :label="item.label"
+                      :value="item.value">
+                    </el-option>
+                  </el-select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-play me-2"></i>
+                Quick Actions
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <button @click="demo1Click" class="btn btn-success">
+                  <i class="fas fa-rocket me-2"></i>Demo1
+                </button>
+                <button @click="demo2Click" class="btn btn-success">
+                  <i class="fas fa-rocket me-2"></i>Demo2
+                </button>
+                <button @click="resetClick" class="btn btn-danger">
+                  <i class="fas fa-undo me-2"></i>Reset
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 选项 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" @change="getAllList" v-model="form.check1" id="check1">
+                <label class="form-check-label" for="check1">
+                  Show cell-cell interactions at the class level
+                </label>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" @change="getAllList" v-model="form.check2" id="check2">
+                <label class="form-check-label" for="check2">
+                  Show cell-cell interactions at the subclass level
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 结果展示 -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>
+                Results
+              </h5>
+            </div>
+            <div class="card-body">
+              <!-- 图表区域 -->
+              <div v-if="chartList.length > 0" class="mb-4">
+                <Chart ref="chart" />
+              </div>
+              
+              <!-- 表格区域 -->
+              <div v-if="tableList.length > 0">
+                <Table 
+                  :tableList="tableList" 
+                  :total="total"
+                  @size-change="handleSizeChange"
+                  @current-change="handleCurrentChange"
+                />
+              </div>
+              
+              <!-- 无数据提示 -->
+              <div v-if="chartList.length === 0 && tableList.length === 0" class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">No results found</h5>
+                <p class="text-muted">Please select some criteria and try searching again.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <Footer/>
-  </div>
+  </BaseLayout>
 </template>
 
 <script>
-import NavBar from '@components/NavBar'
-import Footer from '@components/Footer'
-import Table from './Table.vue'
+import BaseLayout from '@/components/BaseLayout.vue'
 import Chart from './Chart.vue'
+import Table from './Table.vue'
+
 export default {
   components: {
-    NavBar,
-    Table,
+    BaseLayout,
     Chart,
-    Footer
+    Table
   },
   data () {
     return {
-      contextFold: false, // 默认全部展开
-      cellTypeFold: false, // 默认全部展开
-      // 两个选择框
+      // 树数据
+      treeList1: [],
+      treeList2: [],
+      
+      // 输入值
+      context_input: '',
+      cell_type_input: '',
+      methodValue: '',
+      
+      // 折叠状态
+      contextFold: false,
+      cellTypeFold: false,
+      
+      // 选中值
+      contextVal: '',
+      cellTypeVal: '',
+      
+      // 选项数据
+      method: [
+        { value: 'Experimental', label: 'Experimental' },
+        { value: 'Computational', label: 'Computational' }
+      ],
+      
+      // 表单选项
       form: {
         check1: false,
         check2: false
       },
-      species: [{
-        value: 'human',
-        label: 'human'
-      }, {
-        value: 'mouse',
-        label: 'mouse'
-      }],
-      method: [{
-        value: 'computational',
-        label: 'computational'
-      }, {
-        value: 'experimental',
-        label: 'experimental'
-      }],
-      speciesValue: 'human',
-      methodValue: '',
-      other: '',
-      context_input: '',
-      cell_type_input: '',
-      treeList1: [],
-      treeList2: [],
-      contextVal: '',
-      cellTypeVal: '',
+      
+      // 结果数据
       chartList: [],
       tableList: [],
-      current: 1, // 分页-页数
-      size: 10, // 分页-每页数量
-      total: 0 // 分页-总数
+      total: 0,
+      current: 1,
+      size: 10
     }
   },
-  created () {
+  mounted () {
     this.getContextTree()
     this.getCellTypeTree()
-  },
-  beforeUnmount() {
-    // 清理组件状态
-    this.chartList = []
-    this.tableList = []
-  },
-  watch: {
-    context_input (val) {
-      this.$refs.tree1.filter(val)
-    },
-    cell_type_input (val) {
-      this.$refs.tree2.filter(val)
-    }
   },
   methods: {
     // 过滤树1
@@ -388,61 +467,38 @@ export default {
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.wrap-search{
-  background: #FFF;
-  overflow: hidden;
-}
-.content{
-  padding: 20px;
-  padding-top: 100px;
-  background: #FFFFFF;
-  height: 100%;
-  overflow-y: auto;
-}
-.top{
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  margin-top: 20px;
-}
-.top-item-box{
-  display: flex;
-  flex-direction: row;
-  align-items: flex-start;
-  .top-item{
-    display: flex;
-    flex-direction: column;
-    margin-right: 15px;
-    h2{
-      margin-bottom: 10px;
+.search-section {
+  .tree-container {
+    height: 300px;
+    overflow-y: auto;
+    border: 1px solid $border-color;
+    border-radius: $border-radius;
+    padding: 1rem;
+  }
+  
+  .card {
+    box-shadow: $box-shadow;
+    transition: $transition-base;
+    
+    &:hover {
+      box-shadow: $box-shadow-lg;
     }
   }
-}
-.top-check{
-  padding: 30px 0;
-}
-.tree-box{
-  display: flex;
-  flex-direction: row;
-  .tree-box-item{
-    flex: 1;
-    border: 1px solid #ddd;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-    .tree{
-      height: 250px;
-      overflow-y: auto;
-      margin-top: 20px;
-    }
-    .tree-box-header{
-      display: flex;
-      flex-direction: row;
-      justify-content: space-between;
-      align-items: center;
-    }
+  
+  .card-header {
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-color;
   }
 }
 
+// 响应式调整
+@media (max-width: 768px) {
+  .search-section {
+    .tree-container {
+      height: 250px;
+    }
+  }
+}
 </style>

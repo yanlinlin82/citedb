@@ -15,6 +15,20 @@ const router = new Router()
 // Middleware
 app.use(bodyParser())
 
+// Add CORS middleware
+app.use(async (ctx, next) => {
+    ctx.set('Access-Control-Allow-Origin', '*')
+    ctx.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    ctx.set('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept, X-Requested-With')
+    
+    if (ctx.method === 'OPTIONS') {
+        ctx.status = 200
+        return
+    }
+    
+    await next()
+})
+
 // Add error handling middleware
 app.use(async (ctx, next) => {
     try {
@@ -721,11 +735,12 @@ app.use(router.allowedMethods())
 
 // Start server
 const appConfig = require('./config/app.js')
-const PORT = process.env.PORT || appConfig.port || 7999
+const PORT = appConfig.port
 app.listen(PORT, () => {
     console.log('='.repeat(50))
     console.log('🚀 CellTypeDB API Server Started Successfully!')
     console.log(`📍 Service Address: http://localhost:${PORT}`)
+    console.log(`🌍 Environment: ${appConfig.env}`)
     console.log(`🗄️  Database File: ${require('./config/database.js').db.database}`)
     console.log(`⏰ Startup Time: ${new Date().toLocaleString()}`)
     console.log('='.repeat(50))
@@ -741,5 +756,11 @@ app.listen(PORT, () => {
     console.log(`   GET  /api/cell-type-tree`)
     console.log(`   GET  /api/download/count`)
     console.log(`   POST /api/download/update`)
+    console.log('='.repeat(50))
+    console.log('🔧 Configuration:')
+    console.log(`   Port: ${PORT}`)
+    console.log(`   CORS Origin: ${appConfig.cors.origin}`)
+    console.log(`   Cache Enabled: ${appConfig.cache.enabled}`)
+    console.log(`   Request Logging: ${appConfig.logging.enableRequestLog}`)
     console.log('='.repeat(50))
 })

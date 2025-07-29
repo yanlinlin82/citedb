@@ -6,68 +6,125 @@
  * @LastEditTime: 2021-07-06 14:08:01
 -->
 <template>
-  <div class="wrap-team">
-    <NavBar current="team" />
-    <div class="content">
-      <div class="title">If you have any questions or concerns about CITEdb, contact us！</div>
-      <div class="title" style="margin-top: 20px">Corresponding Author</div>
-      <el-table
-        :data="list2"
-        border
-        stripe
-        :header-cell-style="{background:'#EFF0FF', color: '#161616'}"
-        style="width: 100%">
-        <el-table-column
-          prop="name"
-          label="Name"
-          width="210">
-        </el-table-column>
-        <el-table-column label="Contribution">
-          <template #default="scope">
-            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contribution}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="Contact">
-          <template #default="scope">
-            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contact}}</div>
-          </template>
-        </el-table-column>
-      </el-table>
-      <div class="title" style="margin-top: 20px">Contributor Lists</div>
-      <el-table
-        :data="list"
-        border
-        stripe
-        :header-cell-style="{background:'#EFF0FF', color: '#161616'}"
-        style="width: 100%">
-        <el-table-column
-          prop="name"
-          label="Name"
-          width="210">
-        </el-table-column>
-        <el-table-column label="Contribution">
-          <template #default="scope">
-            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contribution}}</div>
-          </template>
-        </el-table-column>
-        <el-table-column label="Contact">
-          <template #default="scope">
-            <div class="email"><el-icon class="icon"><Message /></el-icon>{{ scope.row.contact}}</div>
-          </template>
-        </el-table-column>
-      </el-table>
+  <BaseLayout current="team">
+    <!-- 团队页面内容 -->
+    <div class="team-section">
+      <!-- 页面标题 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="text-center">
+            <h1 class="display-5 mb-3">
+              <i class="fas fa-users me-3"></i>
+              Our Team
+            </h1>
+            <p class="lead text-muted">
+              If you have any questions or concerns about CITEdb, contact us!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 通讯作者 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-star me-2"></i>
+                Corresponding Author
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Name</th>
+                      <th>Contribution</th>
+                      <th>Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in list2" :key="item.name">
+                      <td class="fw-bold">{{ item.name }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-tasks text-primary me-2"></i>
+                          {{ item.contribution }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-envelope text-success me-2"></i>
+                          <a :href="`mailto:${item.contact}`" class="text-decoration-none">
+                            {{ item.contact }}
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 贡献者列表 -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-user-friends me-2"></i>
+                Contributor Lists
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Name</th>
+                      <th>Contribution</th>
+                      <th>Contact</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in list" :key="item.name">
+                      <td class="fw-bold">{{ item.name }}</td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-tasks text-primary me-2"></i>
+                          {{ item.contribution }}
+                        </div>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-envelope text-success me-2"></i>
+                          <a :href="`mailto:${item.contact}`" class="text-decoration-none">
+                            {{ item.contact }}
+                          </a>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <Footer/>
-  </div>
+  </BaseLayout>
 </template>
 
 <script>
-import NavBar from '@components/NavBar'
-import Footer from '@components/Footer'
+import BaseLayout from '@/components/BaseLayout.vue'
+
 export default {
   components: {
-    NavBar,
-    Footer
+    BaseLayout
   },
   data () {
     return {
@@ -99,56 +156,61 @@ export default {
       }, {
         name: 'Jiudong Gao',
         contribution: 'Website developer',
-        contact: 'jiudong.gao@simceredx.com',
-        type: 'developer'
-      }, {
-        name: 'Yu Zhang',
-        contribution: 'Website developer',
-        contact: 'yu.zhang@simceredx.com',
+        contact: 'gaojiudong@tsinghua.edu.cn',
         type: 'developer'
       }],
       list2: [{
-        name: 'Lin Hou',
-        contribution: 'Data collection',
-        contact: 'houl@tsinghua.edu.cn',
-        type: 'data'
-      }, {
-        name: 'Hao Guo',
-        contribution: 'Website developer',
-        contact: 'hao.guo@simceredx.com',
-        type: 'developer'
+        name: 'Linlin Yan',
+        contribution: 'Project leader',
+        contact: 'linlin.yan@bioinfo.app'
       }]
     }
-  },
-  mounted () {
-
-  },
-  methods: {
-
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.content{
-  padding: 20px;
-  padding-top: 100px;
-  background: #FFFFFF;
-  height: 100vh;
-}
-.title{
-  font-size: 30px;
-  margin-bottom: 20px;
-}
-.email{
-  display: flex;
-  align-items: center;
-  .icon{
-    margin-right: 10px;
-    color: #409EFF;
-    font-size: 18px;
+.team-section {
+  .card {
+    box-shadow: $box-shadow;
+    transition: $transition-base;
+    
+    &:hover {
+      box-shadow: $box-shadow-lg;
+    }
   }
-  .el-icon-coin{
-    color: #323AC3;
+  
+  .card-header {
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  .table {
+    th {
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    td {
+      vertical-align: middle;
+    }
+  }
+  
+  a {
+    color: $primary;
+    
+    &:hover {
+      color: $primary-dark;
+    }
+  }
+}
+
+// 响应式调整
+@media (max-width: 768px) {
+  .team-section {
+    .table-responsive {
+      font-size: 0.9rem;
+    }
   }
 }
 </style>

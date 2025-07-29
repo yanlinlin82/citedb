@@ -33,7 +33,7 @@
   }
 
   .login{
-    font-size: 14px;
+    font-size: 1rem; /* 16px -> 1rem */
     cursor: pointer;
     &:hover{
       color: $color-primary
@@ -43,7 +43,7 @@
   .bar{
     display: flex;
     .item{
-      font-size: 16px;
+      font-size: 1rem; /* 16px -> 1rem */
       font-weight: 300;
       position: relative;
       height: 64px;

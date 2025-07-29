@@ -11,12 +11,16 @@ else
     FRONTEND_PORT=8080
 fi
 
+# Override with environment variables if set
+API_PORT=${API_PORT:-3000}
+FRONTEND_PORT=${FRONTEND_PORT:-8080}
+
 echo "🚀 Starting CITEdb (API: $API_PORT, Frontend: $FRONTEND_PORT)"
 
 # Start backend
 echo "Starting backend service..."
 cd celltypeapi
-PORT=$API_PORT node simple-index.js &
+API_PORT=$API_PORT node simple-index.js &
 BACKEND_PID=$!
 
 # Start frontend

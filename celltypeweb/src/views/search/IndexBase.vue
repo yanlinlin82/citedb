@@ -59,7 +59,7 @@ export default {
   }
 
   .label{
-    font-size: 20px;
+    font-size: 1.25rem; /* 20px -> 1.25rem */
     font-weight: 500;
     margin-bottom: 10px;
   }
@@ -82,7 +82,7 @@ export default {
     margin: 20px 0;
     display: flex;
     align-items: center;
-    font-size: 20px;
+    font-size: 1.25rem; /* 20px -> 1.25rem */
     justify-content: flex-end;
     .cricle{
       height: 20px;
@@ -96,7 +96,7 @@ export default {
   .empty{
     height: 300px;
     text-align: center;
-    font-size: 30px;
+    font-size: 1.875rem; /* 30px -> 1.875rem */
     padding-top: 50px;
   }
 

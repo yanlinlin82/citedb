@@ -1,64 +1,119 @@
 <!--
- * @page: 页面-团队
+ * @page: 页面-下载
  * @Author: Dragon
  * @Date: 2021-03-16 10:19:31
  * @LastEditors: Dragon
  * @LastEditTime: 2022-04-07 14:00:32
 -->
 <template>
-  <div class="wrap-team">
-    <NavBar current="download" />
-    <div class="content">
-      <div class="title">Download</div>
-      <div style="font-size: 19px;margin-bottom: 20px;line-height: 35px">
-        Select the menu 'Download' to obtain the whole information extracted from 509 published papers in CITEdb, including 728 pairs of cell to cell interactions in human.
+  <BaseLayout current="download">
+    <!-- 下载页面内容 -->
+    <div class="download-section">
+      <!-- 页面标题 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="text-center">
+            <h1 class="display-5 mb-3">
+              <i class="fas fa-download me-3"></i>
+              Download Data
+            </h1>
+            <p class="lead text-muted">
+              Select the menu 'Download' to obtain the whole information extracted from 509 published papers in CITEdb, including 728 pairs of cell to cell interactions in human.
+            </p>
+          </div>
+        </div>
       </div>
-      <el-table
-        :data="list"
-        border
-        stripe
-        :header-cell-style="{background:'#EFF0FF', color: '#161616'}"
-        style="width: 100%">
-        <el-table-column label="FileName">
-          <template #default="scope">
-            <div class="name" @click="Update_Count"><el-icon class="icon"><Download /></el-icon>
-            <el-link href="https://citedb.cn/CITEdb.xlsx" @click="download">{{ scope.row.name}}</el-link></div>
-          </template>
-        </el-table-column>
-        <el-table-column
-          prop="description"
-          label="Description"
-          width="210">
-        </el-table-column>
-        <el-table-column
-          prop="times"
-          label="Download times"
-          width="210">
-        </el-table-column>
-        <el-table-column
-          :formatter="dateFormat"
-          prop="last"
-          label="Latest Download"
-          width="210">
-        </el-table-column>
-        <el-table-column
-          prop="size"
-          label="Size"
-          width="210">
-        </el-table-column>
-      </el-table>
+
+      <!-- 下载表格 -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-table me-2"></i>
+                Available Downloads
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>File Name</th>
+                      <th>Description</th>
+                      <th>Download Times</th>
+                      <th>Latest Download</th>
+                      <th>Size</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="item in list" :key="item.name">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <i class="fas fa-file-excel text-success me-2"></i>
+                          <a 
+                            href="https://citedb.cn/CITEdb.xlsx" 
+                            @click="download"
+                            class="text-decoration-none fw-bold"
+                          >
+                            {{ item.name }}
+                          </a>
+                        </div>
+                      </td>
+                      <td>{{ item.description }}</td>
+                      <td>
+                        <span class="badge bg-primary">{{ item.times }}</span>
+                      </td>
+                      <td>{{ item.last || 'Never' }}</td>
+                      <td>{{ item.size }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下载说明 -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-info-circle me-2"></i>
+                Download Information
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <h6>Data Format</h6>
+                  <p class="text-muted">
+                    The data is provided in Excel (.xlsx) format for easy analysis and integration with other tools.
+                  </p>
+                </div>
+                <div class="col-md-6">
+                  <h6>Data Content</h6>
+                  <p class="text-muted">
+                    Contains comprehensive information about cell-cell interactions, including context, cell types, methods, and references.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
-    <Footer/>
-  </div>
+  </BaseLayout>
 </template>
 
 <script>
-import NavBar from '@components/NavBar'
-import Footer from '@components/Footer'
+import BaseLayout from '@/components/BaseLayout.vue'
+
 export default {
   components: {
-    NavBar,
-    Footer
+    BaseLayout
   },
   data () {
     return {
@@ -98,46 +153,56 @@ export default {
     download () {
       const link = document.createElement('a')
       link.setAttribute('download', 'CITEdb.xlsx') // 下载的文件名
-      link.href = 'https://citedb.cn/CITEdb.xlsx' // 文件url
+      link.setAttribute('href', 'https://citedb.cn/CITEdb.xlsx') // 下载链接
       link.click()
-    },
-    // 时间格式化
-    dateFormat (row, column) {
-      const daterc = row[column.property]
-      if (daterc != null) {
-        const dateMat = new Date(daterc)
-        const year = dateMat.getFullYear()
-        const month = dateMat.getMonth() + 1
-        const day = dateMat.getDate()
-        const hh = dateMat.getHours()
-        const mm = dateMat.getMinutes()
-        const ss = dateMat.getSeconds()
-        const timeFormat = year + '-' + month + '-' + day + ' ' + hh + ':' + mm + ':' + ss
-        return timeFormat
-      }
+      this.Update_Count()
     }
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.content{
-  padding: 20px;
-  padding-top: 100px;
-  background: #FFFFFF;
-  height: 100vh;
+.download-section {
+  .card {
+    box-shadow: $box-shadow;
+    transition: $transition-base;
+    
+    &:hover {
+      box-shadow: $box-shadow-lg;
+    }
+  }
+  
+  .card-header {
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  .table {
+    th {
+      font-weight: 600;
+      color: $text-primary;
+    }
+    
+    td {
+      vertical-align: middle;
+    }
+  }
+  
+  .badge {
+    font-size: 0.9rem;
+  }
 }
-.title{
-  font-size: 30px;
-  margin-bottom: 20px;
-}
-.name{
-  display: flex;
-  align-items: center;
-  cursor: pointer;
-  .icon{
-    margin-right: 10px;
-    color: #409EFF;
-    font-size: 18px;
+
+// 响应式调整
+@media (max-width: 768px) {
+  .download-section {
+    .table-responsive {
+      font-size: 0.9rem;
+    }
+    
+    .badge {
+      font-size: 0.8rem;
+    }
   }
 }
 </style>

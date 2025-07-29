@@ -1,0 +1,112 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient definitions for cells -->
+    <radialGradient id="cellGradient1" cx="30%" cy="30%" r="70%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#357ABD;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="cellGradient2" cx="40%" cy="40%" r="60%">
+      <stop offset="0%" style="stop-color:#7ED321;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#5BAF19;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="cellGradient3" cx="35%" cy="35%" r="65%">
+      <stop offset="0%" style="stop-color:#F5A623;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D68910;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="cellGradient4" cx="45%" cy="45%" r="55%">
+      <stop offset="0%" style="stop-color:#D0021B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#B00101;stop-opacity:1" />
+    </radialGradient>
+    
+    <radialGradient id="cellGradient5" cx="25%" cy="25%" r="75%">
+      <stop offset="0%" style="stop-color:#9013FE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7B0FD8;stop-opacity:1" />
+    </radialGradient>
+    
+    <!-- Connection line gradient -->
+    <linearGradient id="connectionGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4A90E2;stop-opacity:0.8" />
+      <stop offset="50%" style="stop-color:#7ED321;stop-opacity:0.6" />
+      <stop offset="100%" style="stop-color:#F5A623;stop-opacity:0.8" />
+    </linearGradient>
+    
+    <!-- Glow effect -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- Background circle for overall shape -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="#E8F4FD" stroke-width="2" opacity="0.3"/>
+  
+  <!-- Cell 1 (Blue) - Top left -->
+  <circle cx="60" cy="60" r="25" fill="url(#cellGradient1)" filter="url(#glow)"/>
+  <circle cx="55" cy="55" r="8" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="65" cy="65" r="5" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Cell 2 (Green) - Top right -->
+  <circle cx="140" cy="60" r="22" fill="url(#cellGradient2)" filter="url(#glow)"/>
+  <circle cx="135" cy="55" r="7" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="145" cy="65" r="4" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Cell 3 (Orange) - Bottom left -->
+  <circle cx="60" cy="140" r="20" fill="url(#cellGradient3)" filter="url(#glow)"/>
+  <circle cx="55" cy="135" r="6" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="65" cy="145" r="3" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Cell 4 (Red) - Bottom right -->
+  <circle cx="140" cy="140" r="28" fill="url(#cellGradient4)" filter="url(#glow)"/>
+  <circle cx="135" cy="135" r="9" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="145" cy="145" r="6" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Cell 5 (Purple) - Center -->
+  <circle cx="100" cy="100" r="18" fill="url(#cellGradient5)" filter="url(#glow)"/>
+  <circle cx="95" cy="95" r="5" fill="rgba(255,255,255,0.8)"/>
+  <circle cx="105" cy="105" r="3" fill="rgba(255,255,255,0.6)"/>
+  
+  <!-- Connection lines representing cell-cell interactions -->
+  <!-- Diagonal connections -->
+  <path d="M 85 85 Q 100 100 115 115" stroke="url(#connectionGradient)" stroke-width="3" fill="none" opacity="0.7"/>
+  <path d="M 115 85 Q 100 100 85 115" stroke="url(#connectionGradient)" stroke-width="3" fill="none" opacity="0.7"/>
+  
+  <!-- Horizontal connections -->
+  <path d="M 85 60 Q 100 60 115 60" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M 85 140 Q 100 140 115 140" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  
+  <!-- Vertical connections -->
+  <path d="M 60 85 Q 60 100 60 115" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  <path d="M 140 85 Q 140 100 140 115" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.6"/>
+  
+  <!-- Center connections to all cells -->
+  <path d="M 82 82 Q 100 100 118 118" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.5"/>
+  <path d="M 118 82 Q 100 100 82 118" stroke="url(#connectionGradient)" stroke-width="2" fill="none" opacity="0.5"/>
+  
+  <!-- Pulsing dots at connection points -->
+  <circle cx="100" cy="100" r="2" fill="#4A90E2" opacity="0.8">
+    <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0.8;0.4;0.8" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  
+  <!-- Small interaction particles -->
+  <circle cx="90" cy="90" r="1.5" fill="#7ED321" opacity="0.6">
+    <animate attributeName="cx" values="90;110;90" dur="3s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="90;110;90" dur="3s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="110" cy="90" r="1" fill="#F5A623" opacity="0.7">
+    <animate attributeName="cx" values="110;90;110" dur="2.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="90;110;90" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  
+  <circle cx="90" cy="110" r="1.2" fill="#D0021B" opacity="0.6">
+    <animate attributeName="cx" values="90;110;90" dur="3.5s" repeatCount="indefinite"/>
+    <animate attributeName="cy" values="110;90;110" dur="3.5s" repeatCount="indefinite"/>
+  </circle>
+</svg>

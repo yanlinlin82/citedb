@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "nodemon simple-index.js",
     "start": "node simple-index.js",
+    "start:prod": "NODE_ENV=production node simple-index.js",
+    "start:dev": "NODE_ENV=development nodemon simple-index.js",
     "pm2:start": "pm2 start simple-index.js -i 1 --name='CellTypeDB'",
-    "pm2:stop": "pm2 stop CellTypeDB"
+    "pm2:stop": "pm2 stop CellTypeDB",
+    "pm2:restart": "pm2 restart CellTypeDB"
   },
   "author": "zhangyu",
   "license": "ISC",

@@ -263,6 +263,7 @@ export default {
         })
       })
       this.initLinks(list, data)
+      // console.log(links)
     },
     initLinks (list, data) {
       const links = []
@@ -343,7 +344,7 @@ export default {
 }
 
 .label{
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px -> 1.25rem */
   font-weight: 500;
   margin-bottom: 10px;
 }
@@ -375,7 +376,7 @@ export default {
 }
 
 .label{
-    font-size: 20px;
+    font-size: 1.25rem; /* 20px -> 1.25rem */
     font-weight: 500;
     margin-bottom: 10px;
   }
@@ -387,7 +388,7 @@ export default {
 }
 
 .result{
-  font-size: 16px;
+  font-size: 1rem; /* 16px -> 1rem */
   // color: #409EFF;
   margin: 10px 0;
   display: flex;
@@ -417,7 +418,7 @@ export default {
   padding: 10px;
   .res-item{
     line-height: 25px;
-    font-size: 16px;
+    font-size: 1rem; /* 16px -> 1rem */
     width: 100%;
     cursor: pointer;
     &.active{

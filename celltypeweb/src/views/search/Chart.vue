@@ -379,7 +379,7 @@ export default {
   margin: 20px 0;
   display: flex;
   align-items: center;
-  font-size: 20px;
+  font-size: 1.25rem; /* 20px -> 1.25rem */
   justify-content: flex-end;
   .cricle{
     height: 20px;
@@ -405,7 +405,7 @@ export default {
     transition: background-color 0.2s;
     
     .icon{
-      font-size: 18px;
+      font-size: 1.125rem; /* 18px -> 1.125rem */
       font-weight: bold;
       color: #333;
       width: 20px;
@@ -417,7 +417,7 @@ export default {
     
     .txt{
       margin-top: 3px;
-      font-size: 12px;
+      font-size: 0.75rem; /* 12px -> 0.75rem */
       color: #666;
     }
   }

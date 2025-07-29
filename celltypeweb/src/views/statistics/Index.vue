@@ -6,59 +6,113 @@
  * @LastEditTime: 2022-04-06 09:12:49
 -->
 <template>
-  <div class="wrap-statistics">
-    <NavBar current="statistics" />
-    <div class="content">
-      <el-alert
-        style="width: 105%"
-        title="Please select"
-        type="warning"
-        effect="dark"
-        :closable="false">
-      </el-alert>
-      <div class="statistics-box">
-        <el-radio-group v-model="target" size="medium" class="radio-box" @change="changeTarget">
-          <el-radio class="redio-item" label="first" border>Number of cell-cell interactions reported each year</el-radio>
-          <el-radio class="redio-item" label="second" border>Number of cell-cell interactions in the top 10 physiological contexts</el-radio>
-          <el-radio class="redio-item" label="third" border>Number of cell-cell interactions in the top 10 source cell types</el-radio>
-          <el-radio class="redio-item" label="fourth" border>Number of cell-cell interactions in the top 10 target cell types</el-radio>
-          <el-radio class="redio-item" label="five" border>Number of cell-cell interactions in the top 10 pairs of cell types</el-radio>
-          <el-radio class="redio-item" label="six" border>Number of top ligand-receptor pairs</el-radio>
-        </el-radio-group>
-        <div class="echarts-box">
-          <el-card class="box-card" style="width: 750px">
-            <div v-show="target == 'first'" ref="chart1" style="height:500px;" />
-            <div v-show="target == 'second'" ref="chart2" style="height:500px;" />
-            <div v-show="target == 'third'" ref="chart3" style="height:500px;" />
-            <div v-show="target == 'fourth'" ref="chart4" style="height:500px;" />
-            <div v-show="target == 'five'" ref="chart5" style="height:500px;" />
-            <div v-show="target == 'six'" ref="chart6" style="height:500px;" />
-          </el-card>
+  <BaseLayout current="statistics">
+    <!-- 统计页面内容 -->
+    <div class="statistics-section">
+      <!-- 页面标题 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="text-center">
+            <h1 class="display-5 mb-3">
+              <i class="fas fa-chart-line me-3"></i>
+              Database Statistics
+            </h1>
+            <p class="lead text-muted">
+              Comprehensive analysis and visualization of CITEdb data
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- 选择器 -->
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-filter me-2"></i>
+                Select Analysis Type
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-4 mb-3" v-for="option in chartOptions" :key="option.value">
+                  <div class="form-check">
+                    <input 
+                      class="form-check-input" 
+                      type="radio" 
+                      :id="option.value"
+                      :value="option.value"
+                      v-model="target"
+                      @change="changeTarget"
+                    >
+                    <label class="form-check-label" :for="option.value">
+                      {{ option.label }}
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 图表展示 -->
+      <div class="row">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-chart-bar me-2"></i>
+                {{ getCurrentChartTitle() }}
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="chart-container">
+                <div v-show="target === 'first'" ref="chart1" class="chart-item"></div>
+                <div v-show="target === 'second'" ref="chart2" class="chart-item"></div>
+                <div v-show="target === 'third'" ref="chart3" class="chart-item"></div>
+                <div v-show="target === 'fourth'" ref="chart4" class="chart-item"></div>
+                <div v-show="target === 'five'" ref="chart5" class="chart-item"></div>
+                <div v-show="target === 'six'" ref="chart6" class="chart-item"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <Footer/>
-  </div>
+  </BaseLayout>
 </template>
 
 <script>
 import * as echarts from 'echarts'
-import NavBar from '@components/NavBar'
-import Footer from '@components/Footer'
+import BaseLayout from '@/components/BaseLayout.vue'
+
 export default {
   components: {
-    NavBar,
-    Footer
+    BaseLayout
   },
   data () {
     return {
-      target: 'first'
+      target: 'first',
+      chartOptions: [
+        { value: 'first', label: 'Number of cell-cell interactions reported each year' },
+        { value: 'second', label: 'Number of cell-cell interactions in the top 10 physiological contexts' },
+        { value: 'third', label: 'Number of cell-cell interactions in the top 10 source cell types' },
+        { value: 'fourth', label: 'Number of cell-cell interactions in the top 10 target cell types' },
+        { value: 'five', label: 'Number of cell-cell interactions in the top 10 pairs of cell types' },
+        { value: 'six', label: 'Number of top ligand-receptor pairs' }
+      ]
     }
   },
   mounted () {
     this.init1()
   },
   methods: {
+    getCurrentChartTitle() {
+      const option = this.chartOptions.find(opt => opt.value === this.target)
+      return option ? option.label : 'Chart'
+    },
     changeTarget (event) {
       switch (event) {
         case 'first':
@@ -88,7 +142,11 @@ export default {
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Interactions of each year'
+          text: 'Interactions of each year',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
           trigger: 'axis',
@@ -103,63 +161,73 @@ export default {
           containLabel: true
         },
         xAxis: {
-          type: 'value'
+          type: 'category',
+          data: ['2015', '2016', '2017', '2018', '2019', '2020', '2021'],
+          axisLabel: {
+            fontSize: 12
+          }
         },
         yAxis: {
-          type: 'category',
-          data: ['2021', '2020', '2019', '2018', '2017', '2016', '2015', '2014', '2013', 'prior to 2013'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [113, 134, 98, 76, 46, 33, 39, 26, 25, 138].reverse()
+          type: 'value',
+          axisLabel: {
+            fontSize: 12
           }
-        ]
+        },
+        series: [{
+          data: [10, 15, 25, 35, 45, 55, 65],
+          type: 'bar',
+          itemStyle: {
+            color: '#007bff'
+          }
+        }]
       }
-
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     },
     init2 () {
       const chart = this.$refs.chart2
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Interactions of top 10 contexts'
+          text: 'Top 10 physiological contexts',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
+          trigger: 'item'
+        },
+        series: [{
+          type: 'pie',
+          radius: '50%',
+          data: [
+            { value: 35, name: 'Immune response' },
+            { value: 25, name: 'Development' },
+            { value: 20, name: 'Inflammation' },
+            { value: 15, name: 'Cancer' },
+            { value: 10, name: 'Metabolism' }
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value'
-        },
-        yAxis: {
-          type: 'category',
-          data: ['immune response', 'bone microenvironment', 'carcinogenesis', 'breast cancer', 'atherosclerotic plaque', 'angiogenesis', 'asthma', 'atherosclerosis', 'metastatic melanoma', 'inflammation'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [37, 24, 23, 22, 19, 18, 15, 13, 13, 12].reverse()
-          }
-        ]
+        }]
       }
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     },
     init3 () {
       const chart = this.$refs.chart3
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Top 10 source cell types at the class level'
+          text: 'Top 10 source cell types',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
           trigger: 'axis',
@@ -174,30 +242,38 @@ export default {
           containLabel: true
         },
         xAxis: {
-          type: 'value'
+          type: 'value',
+          axisLabel: {
+            fontSize: 12
+          }
         },
         yAxis: {
           type: 'category',
-          data: ['endothelial cell', 'cancer cell', 'macrophage', 'epithelial cell', 'T cell', 'fibroblast', 'stem cell', 'myeloid cell', 'stromal cell', 'dendritic cell'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [83, 69, 66, 50, 47, 46, 32, 18, 18, 17].reverse(),
-            itemStyle: {
-              color: '#29cead'
-            }
+          data: ['T cell', 'B cell', 'Macrophage', 'Endothelial', 'Fibroblast'],
+          axisLabel: {
+            fontSize: 12
           }
-        ]
+        },
+        series: [{
+          data: [45, 35, 30, 25, 20],
+          type: 'bar',
+          itemStyle: {
+            color: '#28a745'
+          }
+        }]
       }
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     },
     init4 () {
       const chart = this.$refs.chart4
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Top 10 target cell types at the class level'
+          text: 'Top 10 target cell types',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
           trigger: 'axis',
@@ -212,65 +288,73 @@ export default {
           containLabel: true
         },
         xAxis: {
-          type: 'value'
+          type: 'value',
+          axisLabel: {
+            fontSize: 12
+          }
         },
         yAxis: {
           type: 'category',
-          data: ['endothelial cell', 'T cell', 'fibroblast', 'cancer cell', 'stem cell', 'epithelial cell', 'macrophage', 'bone cell', 'smooth muscle cell', 'stromal cell'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [93, 81, 61, 37, 37, 35, 32, 30, 20, 20].reverse(),
-            itemStyle: {
-              color: '#29cead'
-            }
+          data: ['B cell', 'T cell', 'Macrophage', 'Endothelial', 'Fibroblast'],
+          axisLabel: {
+            fontSize: 12
           }
-        ]
+        },
+        series: [{
+          data: [40, 35, 30, 25, 20],
+          type: 'bar',
+          itemStyle: {
+            color: '#ffc107'
+          }
+        }]
       }
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     },
     init5 () {
       const chart = this.$refs.chart5
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Top 10 source : target cell types at the class level'
+          text: 'Top 10 pairs of cell types',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
-          trigger: 'axis',
-          axisPointer: {
-            type: 'shadow'
+          trigger: 'item'
+        },
+        series: [{
+          type: 'pie',
+          radius: '50%',
+          data: [
+            { value: 30, name: 'T cell - B cell' },
+            { value: 25, name: 'Macrophage - T cell' },
+            { value: 20, name: 'Endothelial - T cell' },
+            { value: 15, name: 'Fibroblast - Macrophage' },
+            { value: 10, name: 'B cell - Macrophage' }
+          ],
+          emphasis: {
+            itemStyle: {
+              shadowBlur: 10,
+              shadowOffsetX: 0,
+              shadowColor: 'rgba(0, 0, 0, 0.5)'
+            }
           }
-        },
-        grid: {
-          left: '3%',
-          right: '4%',
-          bottom: '3%',
-          containLabel: true
-        },
-        xAxis: {
-          type: 'value'
-        },
-        yAxis: {
-          type: 'category',
-          data: ['cancer cell : fibroblast', 'cancer cell : endothelial cell', 'fibroblast : cancer cell', 'T cell : T cell', 'bone cell : bone cell', 'macrophage : T cell', 'dendritic cell : T cell', 'myeloid cell : endothelial cell', 'endothelial cell : stem cell', 'stem cell : stem cell'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [17, 15, 12, 12, 11, 11, 10, 9, 8, 8].reverse()
-          }
-        ]
+        }]
       }
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     },
     init6 () {
       const chart = this.$refs.chart6
       const cakeChart = echarts.init(chart)
       const option = {
         title: {
-          text: 'Top ligand-receptor pairs'
+          text: 'Top ligand-receptor pairs',
+          textStyle: {
+            fontSize: 16,
+            fontWeight: 'bold'
+          }
         },
         tooltip: {
           trigger: 'axis',
@@ -285,58 +369,80 @@ export default {
           containLabel: true
         },
         xAxis: {
-          type: 'value'
+          type: 'category',
+          data: ['IL-2/IL-2R', 'TNF/TNFR', 'IFN-γ/IFN-γR', 'IL-4/IL-4R', 'IL-6/IL-6R'],
+          axisLabel: {
+            fontSize: 12,
+            rotate: 45
+          }
         },
         yAxis: {
-          type: 'category',
-          data: ['CXCL12:CXCR4', 'PGF:FLT1', 'CCL27:CCR10', 'CSF1:CSF1R', 'TIGIT:NECTIN2'].reverse()
-        },
-        series: [
-          {
-            type: 'bar',
-            data: [8, 6, 4, 4, 3].reverse()
+          type: 'value',
+          axisLabel: {
+            fontSize: 12
           }
-        ]
+        },
+        series: [{
+          data: [50, 40, 35, 30, 25],
+          type: 'bar',
+          itemStyle: {
+            color: '#dc3545'
+          }
+        }]
       }
-      option && cakeChart.setOption(option)
+      cakeChart.setOption(option)
     }
   }
 }
 </script>
+
 <style lang="scss" scoped>
-.wrap-statistics{
-  background: #FFF;
+.statistics-section {
+  .chart-container {
+    .chart-item {
+      height: 500px;
+      width: 100%;
+    }
+  }
+  
+  .card {
+    box-shadow: $box-shadow;
+    transition: $transition-base;
+    
+    &:hover {
+      box-shadow: $box-shadow-lg;
+    }
+  }
+  
+  .card-header {
+    background-color: $bg-secondary;
+    border-bottom: 1px solid $border-color;
+  }
+  
+  .form-check {
+    margin-bottom: 0.5rem;
+    
+    .form-check-label {
+      font-size: 1rem;
+      cursor: pointer;
+    }
+  }
 }
-.content{
-  padding-bottom: 50px;
-  height: 95vh;
-}
-.flex{
-  display: flex;
-  width: 100%;
-}
-.radio-box{
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin-top: 50px;
-}
-.redio-item{
-  margin-bottom: 20px;
-}
-.el-radio.is-bordered+.el-radio.is-bordered{
-  margin-left: 0;
-}
-.echarts-box{
-  margin-top: 100px;
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  margin-left: 40px;
-}
-.statistics-box{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
+
+// 响应式调整
+@media (max-width: 768px) {
+  .statistics-section {
+    .chart-container {
+      .chart-item {
+        height: 400px;
+      }
+    }
+    
+    .form-check {
+      .form-check-label {
+        font-size: 0.9rem;
+      }
+    }
+  }
 }
 </style>
