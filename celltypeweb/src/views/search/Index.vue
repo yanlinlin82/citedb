@@ -275,6 +275,7 @@ export default {
       context_input: '',
       cell_type_input: '',
       methodValue: '',
+      speciesValue: '', // 添加缺失的speciesValue
       
       // 折叠状态
       contextFold: false,

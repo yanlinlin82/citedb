@@ -400,10 +400,18 @@ export default {
                 const typeClass = params.data.type_class || params.data.name
                 console.log('Using type_class:', typeClass)
                 
-                that.$axios.post('get_count', {
-                  name: typeClass,
-                  check: that.check
-                }).then((res) => {
+                // 添加错误处理和超时机制
+                const timeoutPromise = new Promise((_, reject) => {
+                  setTimeout(() => reject(new Error('Request timeout')), 5000)
+                })
+                
+                Promise.race([
+                  that.$axios.post('get_count', {
+                    name: typeClass,
+                    check: that.check
+                  }),
+                  timeoutPromise
+                ]).then((res) => {
                   console.log('get_count response:', res)
                   if (res.msg === 'ok' && res.data) {
                     const content = `节点: ${params.data.name}<br/>类型: ${typeClass}<br/>数量: ${res.data}`
@@ -415,7 +423,8 @@ export default {
                   }
                 }).catch((error) => {
                   console.error('get_count error:', error)
-                  const content = `节点: ${params.data.name}<br/>类型: ${typeClass}<br/>数量: 获取失败`
+                  // 提供友好的错误信息，不显示技术细节
+                  const content = `节点: ${params.data.name}<br/>类型: ${typeClass}<br/>数量: 暂不可用`
                   callback(ticket, content)
                 })
                 

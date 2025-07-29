@@ -207,7 +207,7 @@ export default {
     // 获取下载次数
     async getDownloadCount() {
       try {
-        const response = await this.$axios.get('/api/v1/download/count')
+        const response = await this.$axios.get('download/count')
         if (response.msg === 'ok' && response.data) {
           this.downloadCount = response.data.count || 0
         } else {
@@ -215,7 +215,7 @@ export default {
           this.downloadCount = 0
         }
       } catch (error) {
-        console.error('Failed to get download count:', error)
+        console.warn('Download count API not available, using default value:', error.message)
         // 如果API失败，设置默认值，不影响用户体验
         this.downloadCount = 0
       }
@@ -224,7 +224,7 @@ export default {
     // 更新下载次数
     async updateDownloadCount() {
       try {
-        const response = await this.$axios.post('/api/v1/download/update', {
+        const response = await this.$axios.post('download/update', {
           count: this.downloadCount
         })
         if (response.msg === 'ok') {
@@ -236,7 +236,7 @@ export default {
           this.downloadCount++
         }
       } catch (error) {
-        console.error('Failed to update download count:', error)
+        console.warn('Download count update API not available, using local count:', error.message)
         // 即使API失败，也增加本地计数，确保用户体验不受影响
         this.downloadCount++
       }
